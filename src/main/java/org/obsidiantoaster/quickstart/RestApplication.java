@@ -35,6 +35,9 @@ public class RestApplication extends AbstractVerticle {
     Router router = Router.router(vertx);
 
     router.get("/greeting").handler(this::greeting);
+    router.get("/health").handler(rc -> rc.response().end("OK"));
+    router.get("/env").handler(rc -> rc.response().end(System.getenv("DB_USERNAME") + " / " + System.getenv
+        ("DB_PASSWORD")));
 
     // Create the HTTP server and pass the "accept" method to the request handler.
     vertx
