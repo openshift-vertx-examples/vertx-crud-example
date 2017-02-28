@@ -72,6 +72,17 @@
       <artifactId>vertx-web</artifactId>
     </dependency>
 
+    <dependency>
+      <groupId>io.vertx</groupId>
+      <artifactId>vertx-jdbc-client</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.postgresql</groupId>
+      <artifactId>postgresql</artifactId>
+      <version>9.4.1212</version>
+    </dependency>
+
     <!-- Logging -->
     <dependency>
       <groupId>org.slf4j</groupId>
@@ -79,32 +90,9 @@
       <version>${slf4j.version}</version>
     </dependency>
 
-    <!-- Testing -->
-    <dependency>
-      <groupId>io.vertx</groupId>
-      <artifactId>vertx-unit</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.jboss.arquillian.junit</groupId>
-      <artifactId>arquillian-junit-container</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>io.fabric8</groupId>
-      <artifactId>fabric8-arquillian</artifactId>
-      <scope>test</scope>
-    </dependency>
   </dependencies>
 
   <build>
-    <testResources>
-      <testResource>
-        <directory>src/test/resources</directory>
-        <filtering>true</filtering>
-      </testResource>
-    </testResources>
-
     <plugins>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>

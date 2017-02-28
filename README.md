@@ -1,21 +1,9 @@
 # Introduction
 
-This project exposes a simple REST endpoint where the service greeting is available at this address http://hostname:port/greeting and returns a json Greeting message
-
-```json
-{
-    "content": "Hello, World!",
-    "id": 1
-}
-```
-
-The id of the message is incremented for each request. To customize the message, you can pass as parameter the name of the person that you want to send your greeting.
-You can perform this task in 2 different ways:
+This project exposes a simple REST to JDBC endpoint where the products and stocks can be managed.
 
 1. Build and launch using vert.x or the vert.x maven plug-in.
 1. Build, deploy, and authenticate using OpenShift Online.
-
-The id of the message is incremented for each request. To customize the message, you can pass as parameter the name of the person that you want to send your greeting.
 
 # Prerequisites
 
@@ -24,7 +12,7 @@ To get started with these quickstarts you'll need the following prerequisites:
 Name | Description | Version
 --- | --- | ---
 [java][1] | Java JDK | 8
-[maven][2] | Apache Maven | 3.2.x 
+[maven][2] | Apache Maven | 3.3.x 
 [oc][3] | OpenShift Client | v3.3.x
 [git][4] | Git version management | 2.x 
 
@@ -54,10 +42,16 @@ mvn clean package
 1. Execute the following HTTP Get requests to get a response from the Rest endpoint:
 
     ```
-    http http://localhost:8080/greeting
-    http http://localhost:8080/greeting name==Charles
-    curl http://localhost:8080/greeting
-    curl http://localhost:8080/greeting?name=Bruno
+    # list all products
+    curl http http://localhost:8080/products
+    # list single product
+    curl http http://localhost:8080/products/1
+    # create new product
+    curl -H "Content-Type: application/json" -X POST -d '{"name":"Pineapple","stock":"1"}' http://localhost:8080/products
+    # update a product
+    curl -H "Content-Type: application/json" -X PUT -d '{"name":"Apple","stock":"100"}' http://localhost:8080/products/1
+    # delete a product
+    curl -H "Content-Type: application/json" -X DELETE http://localhost:8080/products/1
     ```
 
 # Launch using Vert.x maven plugin
@@ -90,13 +84,16 @@ mvn compile vertx:run
     ```
 1. Call the endpoint using curl or httpie tool
     ```
-    http http://<HOST_PORT_ADDRESS>/greeting
-    http http://<HOST_PORT_ADDRESS>/greeting name==Bruno
-    
-    or 
-    
-    curl http://<HOST_PORT_ADDRESS>/greeting
-    curl http://<HOST_PORT_ADDRESS>/greeting name==Bruno
+    # list all products
+    curl http http://localhost:8080/products
+    # list single product
+    curl http http://localhost:8080/products/1
+    # create new product
+    curl -H "Content-Type: application/json" -X POST -d '{"name":"Pineapple","stock":"1"}' http://localhost:8080/products
+    # update a product
+    curl -H "Content-Type: application/json" -X PUT -d '{"name":"Apple","stock":"100"}' http://localhost:8080/products/1
+    # delete a product
+    curl -H "Content-Type: application/json" -X DELETE http://localhost:8080/products/1
     ```
 
 
