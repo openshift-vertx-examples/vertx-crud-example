@@ -1,0 +1,154 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8"/>
+  <title>
+    AngularJS - REST Demo using $http service
+  </title>
+  <!-- Load AngularJS -->
+  <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular.min.js"></script>
+  <script type="text/javascript">
+    var app = angular.module("ProductManagement", []);
+
+    //Controller Part
+    app.controller("ProductManagementController", function ($scope, $http) {
+
+      //Initialize page with default data which is blank in this example
+      $scope.products = [];
+
+      $scope.form = {
+        id: -1,
+        name: "",
+        stock: ""
+      };
+
+      //Now load the data from server
+      _refreshPageData();
+
+      //HTTP POST/PUT methods for add/edit product
+      $scope.update = function () {
+
+        var method = "";
+        var url = "";
+        if ($scope.form.id == -1) {
+          //Id is absent so add product - POST operation
+          method = "POST";
+          url = 'products';
+        } else {
+          //If Id is present, it's edit operation - PUT operation
+          method = "PUT";
+          url = 'products/' + $scope.form.id;
+        }
+
+        $http({
+          method: method,
+          url: url,
+          data: angular.toJson($scope.form),
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        }).then(_success, _error);
+      };
+
+      //HTTP DELETE- delete product by Id
+      $scope.remove = function (product) {
+        $http({
+          method: 'DELETE',
+          url: 'products/' + product.id
+        }).then(_success, _error);
+      };
+
+      //In case of edit product, populate form with product data
+      $scope.edit = function (product) {
+        $scope.form.name = product.name;
+        $scope.form.stock = product.stock;
+        $scope.form.id = product.id;
+      };
+
+      /* Private Methods */
+      //HTTP GET- get all products collection
+      function _refreshPageData() {
+        $http({
+          method: 'GET',
+          url: 'products'
+        }).then(function successCallback(response) {
+          $scope.products = response.data;
+        }, function errorCallback(response) {
+          console.log(response.statusText);
+        });
+      }
+
+      function _success(response) {
+        _refreshPageData();
+        _clearForm()
+      }
+
+      function _error(response) {
+        console.error(response.statusText);
+      }
+
+      //Clear the form
+      function _clearForm() {
+        $scope.form.name = "";
+        $scope.form.stock = 0;
+        $scope.form.id = -1;
+      }
+    });
+  </script>
+  <style>
+    .button {
+      cursor: pointer;
+      color: blue;
+    }
+
+    td, th {
+      border: 1px solid gray;
+      width: 25%;
+      text-align: left;
+    }
+
+    table {
+      width: 600px;
+    }
+  </style>
+  <head>
+<body ng-app="ProductManagement" ng-controller="ProductManagementController">
+<h1>
+  AngularJS - Use $http to invoke RESTful APIs
+</h1>
+
+<table>
+  <tr>
+    <th>Name</th>
+    <th>Stock</th>
+    <th>Actions</th>
+  </tr>
+
+  <tr ng-repeat="product in products">
+    <td>{{ product.name }}</td>
+    <td>{{ product.stock }}</td>
+    <td><a ng-click="edit( product )" class="button">Edit</a> | <a ng-click="remove( product )" class="button">Remove</a></td>
+  </tr>
+
+</table>
+
+<h2>Add/Edit product</h2>
+
+<form ng-submit="update()">
+  <table>
+    <tr>
+      <td>Name</td>
+      <td><input type="text" ng-model="form.name" size="60"/></td>
+    </tr>
+    <tr>
+      <td>Stock</td>
+      <td><input type="text" ng-model="form.stock" size="60"/></td>
+    </tr>
+    <tr>
+      <td colspan="2"><input type="submit" value="Submit"/></td>
+    </tr>
+  </table>
+</form>
+
+</body>
+</html>

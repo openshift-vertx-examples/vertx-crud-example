@@ -34,7 +34,7 @@ public class JdbcProductStore implements Store {
 
   private static final
   // language=sql
-    String INSERT = "INSERT INTO products (name, stock) VALUES (?, ?)";
+    String INSERT = "INSERT INTO products (name, stock) VALUES (?, ?::BIGINT)";
 
   private static final
   // language=sql
@@ -46,7 +46,7 @@ public class JdbcProductStore implements Store {
 
   private static final
   // language=sql
-    String UPDATE = "UPDATE products SET name = ?, stock = ? WHERE id = ?";
+    String UPDATE = "UPDATE products SET name = ?, stock = ?::BIGINT WHERE id = ?";
 
   private static final
   // language=sql
@@ -64,7 +64,7 @@ public class JdbcProductStore implements Store {
       if (res.failed()) {
         handler.handle(Future.failedFuture(res.cause()));
       } else {
-        res.result().updateWithParams(INSERT, new JsonArray().add(item.getString("name")).add(item.getInteger("stock")), insert -> {
+        res.result().updateWithParams(INSERT, new JsonArray().add(item.getValue("name")).add(item.getValue("stock")), insert -> {
           // close the connection
           res.result().close();
 
@@ -130,7 +130,7 @@ public class JdbcProductStore implements Store {
       if (res.failed()) {
         handler.handle(Future.failedFuture(res.cause()));
       } else {
-        res.result().updateWithParams(UPDATE, new JsonArray().add(item.getString("name")).add(item.getInteger("stock")).add(id), update -> {
+        res.result().updateWithParams(UPDATE, new JsonArray().add(item.getValue("name")).add(item.getValue("stock")).add(id), update -> {
           // close the connection
           res.result().close();
 

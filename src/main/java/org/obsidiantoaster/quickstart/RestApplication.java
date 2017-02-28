@@ -21,6 +21,7 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.ext.jdbc.JDBCClient;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.handler.BodyHandler;
+import io.vertx.ext.web.handler.StaticHandler;
 import org.obsidiantoaster.quickstart.service.Store;
 import org.obsidiantoaster.quickstart.service.impl.JdbcProductStore;
 
@@ -35,8 +36,8 @@ public class RestApplication extends AbstractVerticle {
     JDBCClient jdbc = JDBCClient.createShared(vertx, new JsonObject()
       .put("url", "jdbc:postgresql://localhost:5432/quickstart")
       .put("driver_class", "org.postgresql.Driver")
-      .put("user", System.getenv("DB_USERNAME"))
-      .put("password", System.getenv("DB_PASSWORD")));
+      .put("user", "postgres" /*System.getenv("DB_USERNAME")*/)
+      .put("password", "password" /*System.getenv("DB_PASSWORD")*/));
 
     DBInitHelper.initDatabase(vertx, jdbc, ready -> {
       if (ready.failed()) {
@@ -175,6 +176,8 @@ public class RestApplication extends AbstractVerticle {
 
         // health check
         router.get("/health").handler(rc -> rc.response().end("OK"));
+        // web interface
+        router.get().handler(StaticHandler.create());
 
         // Create the HTTP server and pass the "accept" method to the request handler.
         vertx
@@ -188,5 +191,9 @@ public class RestApplication extends AbstractVerticle {
         System.out.println("Server ready!");
       }
     });
+  }
+
+  public static void main(String[] args) {
+    Vertx.vertx().deployVerticle(new RestApplication());
   }
 }

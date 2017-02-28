@@ -7,6 +7,6 @@ CREATE TABLE IF NOT EXISTS products (
 
 DELETE FROM products;
 
-INSERT INTO products (id, name, stock) values (1, 'Apples', 10);
-INSERT INTO products (id, name, stock) values (2, 'Oranges', 10);
-INSERT INTO products (id, name, stock) values (3, 'Pears', 10);
+INSERT INTO products (name, stock) values ('Apple', 10);
+INSERT INTO products (name, stock) values ('Orange', 10);
+INSERT INTO products (name, stock) values ('Pear', 10);
