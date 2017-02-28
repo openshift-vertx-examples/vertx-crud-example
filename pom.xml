@@ -23,12 +23,12 @@
     <version>21</version>
   </parent>
   <groupId>org.obsidiantoaster.quickstart</groupId>
-  <artifactId>vertx-rest</artifactId>
+  <artifactId>vertx-jdbc</artifactId>
   <version>1.0.0-SNAPSHOT</version>
   <packaging>jar</packaging>
 
   <name>rest</name>
-  <description>Vertx - Rest</description>
+  <description>Vertx - JDBC</description>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -39,23 +39,17 @@
     <vertx.version>3.4.0.Beta1</vertx.version>
     <slf4j.version>1.7.21</slf4j.version>
 
-    <fabric8.maven.plugin.version>3.1.92</fabric8.maven.plugin.version>
+    <fabric8.maven.plugin.version>3.2.28</fabric8.maven.plugin.version>
     <maven-surefire-plugin.version>2.19.1</maven-surefire-plugin.version>
     <maven-failsafe-plugin.version>2.19.1</maven-failsafe-plugin.version>
-    <vertx-maven-plugin.version>1.0.2</vertx-maven-plugin.version>
+    <vertx-maven-plugin.version>1.0.4</vertx-maven-plugin.version>
 
     <vertx.verticle>org.obsidiantoaster.quickstart.RestApplication</vertx.verticle>
+
   </properties>
 
   <dependencyManagement>
     <dependencies>
-      <dependency>
-        <groupId>io.fabric8</groupId>
-        <artifactId>fabric8-project-bom-with-platform-deps</artifactId>
-        <version>${fabric8.version}</version>
-        <type>pom</type>
-        <scope>import</scope>
-      </dependency>
       <dependency>
         <groupId>io.vertx</groupId>
         <artifactId>vertx-stack-depchain</artifactId>
@@ -97,7 +91,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
-        <version>3.6.0</version>
+        <version>3.6.1</version>
         <configuration>
           <source>${java.version}</source>
           <target>${java.version}</target>
@@ -143,20 +137,16 @@
               </execution>
             </executions>
             <configuration>
-              <generator>
+              <enricher>
+                <includes>
+                  <include>vertx-health-check</include>
+                </includes>
                 <config>
-                  <java-exec>
-                    <mainClass>io.vertx.core.Launcher</mainClass>
-                  </java-exec>
+                  <vertx-health-check>
+                    <path>/health</path>
+                  </vertx-health-check>
                 </config>
-              </generator>
-              <resources>
-                <labels>
-                  <service>
-                    <expose>true</expose>
-                  </service>
-                </labels>
-              </resources>
+              </enricher>
             </configuration>
           </plugin>
         </plugins>
@@ -172,6 +162,7 @@
             <version>${maven-failsafe-plugin.version}</version>
             <executions>
               <execution>
+                <!-- TODO to implement -->
                 <goals>
                   <goal>integration-test</goal>
                   <goal>verify</goal>
