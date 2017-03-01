@@ -16,10 +16,11 @@
  */
 package org.obsidiantoaster.quickstart;
 
-import io.vertx.core.*;
+import io.vertx.core.AbstractVerticle;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.jdbc.JDBCClient;
 import io.vertx.ext.web.Router;
+import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.handler.BodyHandler;
 import io.vertx.ext.web.handler.StaticHandler;
 import org.obsidiantoaster.quickstart.service.Store;
@@ -27,17 +28,33 @@ import org.obsidiantoaster.quickstart.service.impl.JdbcProductStore;
 
 public class RestApplication extends AbstractVerticle {
 
+  private Store store;
+
   @Override
   public void start() {
     // Create a router object.
     Router router = Router.router(vertx);
+    // implement a basic REST CRUD mapping
+    router.get("/products").handler(this::retrieveAll);
+    router.get("/products/:id").handler(this::getOne);
+    // enable parsing of request bodies
+    router.route().handler(BodyHandler.create());
+    router.post("/products").handler(this::addOne);
+    router.put("/products/:id").handler(this::updateOne);
+    router.delete("/products/:id").handler(this::deleteOne);
+    // health check
+    router.get("/health").handler(rc -> rc.response().end("OK"));
+    // web interface
+    router.get().handler(StaticHandler.create());
+
+
     // Create a JDBC client
-    // TODO: password shoud be retreived from the secret store + connection string from config map
     JDBCClient jdbc = JDBCClient.createShared(vertx, new JsonObject()
-      .put("url", "jdbc:postgresql://localhost:5432/quickstart")
+      .put("url", "jdbc:postgresql://" + System.getenv("MY_DATABASE_SERVICE_HOST") + ":5432/my_data")
       .put("driver_class", "org.postgresql.Driver")
-      .put("user", "postgres" /*System.getenv("DB_USERNAME")*/)
-      .put("password", "password" /*System.getenv("DB_PASSWORD")*/));
+      .put("user", System.getenv("DB_USERNAME"))
+      .put("password", System.getenv("DB_PASSWORD"))
+    );
 
     DBInitHelper.initDatabase(vertx, jdbc, ready -> {
       if (ready.failed()) {
@@ -45,155 +62,139 @@ public class RestApplication extends AbstractVerticle {
         System.err.println("Deployment failed (check DDL or Postgres)!");
       } else {
 
-        // Creata a JDBC store
-        Store store = new JdbcProductStore(jdbc);
+        // Create a JDBC store
+        store = new JdbcProductStore(jdbc);
 
-        // implement a basic REST CRUD mapping
-
-        router.get("/products").handler(ctx -> {
-          store.readAll(readAll -> {
-            if (readAll.failed()) {
-              ctx.fail(readAll.cause());
-            } else {
-              ctx.response()
-                .putHeader("Content-Type", "application/json")
-                .end(readAll.result().encode());
-            }
-          });
-        });
-
-        router.get("/products/:id").handler(ctx -> {
-          long id;
-
-          try {
-            id = Long.parseLong(ctx.pathParam("id"));
-          } catch (NumberFormatException e) {
-            ctx.fail(400);
-            return;
-          }
-
-          store.read(id, read -> {
-            if (read.failed()) {
-              ctx.fail(read.cause());
-            } else {
-              if (read.result() == null) {
-                ctx.response()
-                  .setStatusCode(404)
-                  .end();
-              } else {
-                ctx.response()
-                  .putHeader("Content-Type", "application/json")
-                  .end(read.result().encode());
-              }
-            }
-          });
-        });
-
-        // enable parsing of request bodies
-        router.route().handler(BodyHandler.create());
-
-        router.post("/products").handler(ctx -> {
-          JsonObject item;
-          try {
-            item = ctx.getBodyAsJson();
-          } catch (RuntimeException e) {
-            ctx.fail(e);
-            return;
-          }
-
-          if (item == null) {
-            ctx.fail(400);
-            return;
-          }
-
-          store.create(item, create -> {
-            if (create.failed()) {
-              ctx.fail(create.cause());
-            } else {
-              ctx.response()
-                .putHeader("Location", "/products/" + create.result())
-                .putHeader("Content-Type", "application/json")
-                .setStatusCode(201)
-                .end(create.result().encode());
-            }
-          });
-        });
-
-        router.put("/products/:id").handler(ctx -> {
-          long id;
-
-          try {
-            id = Long.parseLong(ctx.pathParam("id"));
-          } catch (NumberFormatException e) {
-            ctx.fail(400);
-            return;
-          }
-
-          JsonObject item;
-          try {
-            item = ctx.getBodyAsJson();
-          } catch (RuntimeException e) {
-            ctx.fail(e);
-            return;
-          }
-
-          if (item == null) {
-            ctx.response().setStatusCode(400).end();
-            return;
-          }
-
-          store.update(id, item, update -> {
-            if (update.failed()) {
-              ctx.fail(update.cause());
-            } else {
-              ctx.response()
-                .setStatusCode(204)
-                .end();
-            }
-          });
-        });
-
-        router.delete("/products/:id").handler(ctx -> {
-          long id;
-
-          try {
-            id = Long.parseLong(ctx.pathParam("id"));
-          } catch (NumberFormatException e) {
-            ctx.fail(400);
-            return;
-          }
-
-          store.delete(id, delete -> {
-            if (delete.failed()) {
-              ctx.fail(delete.cause());
-            } else {
-              ctx.response()
-                .setStatusCode(204)
-                .end();
-            }
-          });
-        });
-
-        // health check
-        router.get("/health").handler(rc -> rc.response().end("OK"));
-        // web interface
-        router.get().handler(StaticHandler.create());
 
         // Create the HTTP server and pass the "accept" method to the request handler.
         vertx
           .createHttpServer()
           .requestHandler(router::accept)
-          .listen(
-            // Retrieve the port from the configuration,
-            // default to 8080.
-            config().getInteger("http.port", 8080));
+          .listen(8080);
 
         System.out.println("Server ready!");
       }
     });
   }
 
-  public static void main(String[] args) {
-    Vertx.vertx().deployVerticle(new RestApplication());
+
+  private void retrieveAll(RoutingContext ctx) {
+    store.readAll(readAll -> {
+      if (readAll.failed()) {
+        ctx.fail(readAll.cause());
+      } else {
+        ctx.response()
+          .putHeader("Content-Type", "application/json")
+          .end(readAll.result().encode());
+      }
+    });
+  }
+
+  private void getOne(RoutingContext ctx) {
+    long id = getId(ctx);
+    if (id == -1) {
+      ctx.fail(400);
+      return;
+    }
+
+    store.read(id, read -> {
+      if (read.failed()) {
+        ctx.fail(read.cause());
+      } else {
+        if (read.result() == null) {
+          ctx.response()
+            .setStatusCode(404)
+            .end();
+        } else {
+          ctx.response()
+            .putHeader("Content-Type", "application/json")
+            .end(read.result().encode());
+        }
+      }
+    });
+  }
+
+  private void addOne(RoutingContext ctx) {
+    JsonObject item;
+    try {
+      item = ctx.getBodyAsJson();
+    } catch (RuntimeException e) {
+      ctx.fail(e);
+      return;
+    }
+
+    if (item == null) {
+      ctx.fail(400);
+      return;
+    }
+
+    store.create(item, create -> {
+      if (create.failed()) {
+        ctx.fail(create.cause());
+      } else {
+        ctx.response()
+          .putHeader("Location", "/products/" + create.result())
+          .putHeader("Content-Type", "application/json")
+          .setStatusCode(201)
+          .end(create.result().encode());
+      }
+    });
+  }
+
+  private void updateOne(RoutingContext ctx) {
+    long id = getId(ctx);
+    if (id == -1) {
+      ctx.fail(400);
+      return;
+    }
+
+    JsonObject item;
+    try {
+      item = ctx.getBodyAsJson();
+    } catch (RuntimeException e) {
+      ctx.fail(e);
+      return;
+    }
+
+    if (item == null) {
+      ctx.response().setStatusCode(400).end();
+      return;
+    }
+
+    store.update(id, item, update -> {
+      if (update.failed()) {
+        ctx.fail(update.cause());
+      } else {
+        ctx.response()
+          .setStatusCode(204)
+          .end();
+      }
+    });
+  }
+
+  private void deleteOne(RoutingContext ctx) {
+    long id = getId(ctx);
+    if (id == -1) {
+      ctx.fail(400);
+      return;
+    }
+
+    store.delete(id, delete -> {
+      if (delete.failed()) {
+        ctx.fail(delete.cause());
+      } else {
+        ctx.response()
+          .setStatusCode(204)
+          .end();
+      }
+    });
+  }
+
+  private long getId(RoutingContext ctx) {
+    try {
+      return Long.parseLong(ctx.pathParam("id"));
+    } catch (NumberFormatException e) {
+      return -1;
+    }
   }
 }

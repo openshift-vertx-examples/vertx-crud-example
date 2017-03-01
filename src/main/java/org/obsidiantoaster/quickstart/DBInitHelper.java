@@ -37,12 +37,12 @@ public class DBInitHelper {
         handler.handle(Future.failedFuture(read.cause()));
         return;
       }
-
       String[] statements = read.result().toString().split(";");
 
       jdbc.getConnection(get -> {
         if (get.failed()) {
-          handler.handle(Future.failedFuture(read.cause()));
+          System.out.println("Cannot get the connection to the DB");
+          handler.handle(Future.failedFuture(get.cause()));
           return;
         }
 
@@ -56,7 +56,8 @@ public class DBInitHelper {
 
             get.result().execute(statements[pos], exec -> {
               if (exec.failed()) {
-                handler.handle(Future.failedFuture(read.cause()));
+                System.out.println("Failed to execute statement " + pos);
+                handler.handle(Future.failedFuture(exec.cause()));
                 return;
               }
               this.handle(pos + 1);

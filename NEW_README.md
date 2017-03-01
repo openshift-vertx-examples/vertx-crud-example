@@ -29,5 +29,5 @@ oc new-app openshift/postgresql-92-centos7 \
 ## Create secrets
 
 ```
-oc create -f credentials-secrets.yml
+oc create -f credentials-secret.yml
 ```
