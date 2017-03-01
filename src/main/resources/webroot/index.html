@@ -3,8 +3,9 @@
 <head>
   <meta charset="utf-8"/>
   <title>
-    AngularJS - REST Demo using $http service
+    Product Stock Management
   </title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/wingcss/0.1.8/wing.min.css"/>
   <!-- Load AngularJS -->
   <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular.min.js"></script>
   <script type="text/javascript">
@@ -95,60 +96,39 @@
       }
     });
   </script>
-  <style>
-    .button {
-      cursor: pointer;
-      color: blue;
-    }
-
-    td, th {
-      border: 1px solid gray;
-      width: 25%;
-      text-align: left;
-    }
-
-    table {
-      width: 600px;
-    }
-  </style>
-  <head>
+</head>
 <body ng-app="ProductManagement" ng-controller="ProductManagementController">
-<h1>
-  AngularJS - Use $http to invoke RESTful APIs
-</h1>
 
-<table>
-  <tr>
-    <th>Name</th>
-    <th>Stock</th>
-    <th>Actions</th>
-  </tr>
+<div class="container">
 
-  <tr ng-repeat="product in products">
-    <td>{{ product.name }}</td>
-    <td>{{ product.stock }}</td>
-    <td><a ng-click="edit( product )" class="button">Edit</a> | <a ng-click="remove( product )" class="button">Remove</a></td>
-  </tr>
+  <h1>Product Stock Management</h1>
 
-</table>
+  <p>This is a simple playground to the product stock management API.</p>
 
-<h2>Add/Edit product</h2>
+  <h3>Add/Edit product</h3>
 
-<form ng-submit="update()">
-  <table>
-    <tr>
-      <td>Name</td>
-      <td><input type="text" ng-model="form.name" size="60"/></td>
-    </tr>
-    <tr>
-      <td>Stock</td>
-      <td><input type="text" ng-model="form.stock" size="60"/></td>
-    </tr>
-    <tr>
-      <td colspan="2"><input type="submit" value="Submit"/></td>
-    </tr>
-  </table>
-</form>
+  <form ng-submit="update()">
+    <div class="row">
+      <div class="col-6"><input type="text" placeholder="Name" ng-model="form.name" size="60"/></div>
+      <div class="col-6"><input type="text" placeholder="Stock" ng-model="form.stock" size="60"/></div>
+    </div>
+    <input type="submit" value="Save"/>
+  </form>
+
+  <h3>Product List</h3>
+
+  <div class="row">
+    <div class="col-2">Name</div>
+    <div class="col-2">Stock</div>
+  </div>
+
+  <div class="row" ng-repeat="product in products">
+    <div class="col-2">{{ product.name }}</div>
+    <div class="col-2">{{ product.stock }}</div>
+    <div class="col-8"><a ng-click="edit( product )" class="btn">Edit</a> <a ng-click="remove( product )" class="btn">Remove</a></div>
+  </div>
+
+</div>
 
 </body>
 </html>
