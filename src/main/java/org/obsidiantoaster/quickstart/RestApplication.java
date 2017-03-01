@@ -49,11 +49,12 @@ public class RestApplication extends AbstractVerticle {
 
 
     // Create a JDBC client
+
     JDBCClient jdbc = JDBCClient.createShared(vertx, new JsonObject()
-      .put("url", "jdbc:postgresql://" + System.getenv("MY_DATABASE_SERVICE_HOST") + ":5432/my_data")
+      .put("url", "jdbc:postgresql://" + getEnv("MY_DATABASE_SERVICE_HOST", "localhost") + ":5432/my_data")
       .put("driver_class", "org.postgresql.Driver")
-      .put("user", System.getenv("DB_USERNAME"))
-      .put("password", System.getenv("DB_PASSWORD"))
+      .put("user", getEnv("DB_USERNAME", "postgres"))
+      .put("password", getEnv("DB_PASSWORD", "postgres"))
     );
 
     DBInitHelper.initDatabase(vertx, jdbc, ready -> {
@@ -196,5 +197,13 @@ public class RestApplication extends AbstractVerticle {
     } catch (NumberFormatException e) {
       return -1;
     }
+  }
+
+  private String getEnv(String key, String dv) {
+    String s = System.getenv(key);
+    if (s == null) {
+      return dv;
+    }
+    return s;
   }
 }
