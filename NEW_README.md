@@ -23,7 +23,7 @@ oc new-app openshift/postgresql-92-centos7 \
  -e POSTGRESQL_USER=vertx \
  -e POSTGRESQL_PASSWORD=secret \
  -e POSTGRESQL_DATABASE=my_data \
- -l name=my-database  
+ --name=my-database  
 ```
 
 ## Create secrets
