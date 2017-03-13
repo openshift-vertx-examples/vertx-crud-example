@@ -124,6 +124,3 @@ You can run the integration tests using:
 ```
 mvn clean verify -Popenshift -Popenshift-it
 ```
-
-
-
