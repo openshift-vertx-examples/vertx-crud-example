@@ -1,0 +1,2 @@
+name: Vert.x REST Examplue using JDBC
+description: Runs a Vert.x applicaiton exposing a REST endpoint implemented on top of JDBC
