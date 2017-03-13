@@ -17,6 +17,7 @@
 package org.obsidiantoaster.quickstart;
 
 import io.vertx.core.AbstractVerticle;
+import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.jdbc.JDBCClient;
 import io.vertx.ext.web.Router;
@@ -25,6 +26,10 @@ import io.vertx.ext.web.handler.BodyHandler;
 import io.vertx.ext.web.handler.StaticHandler;
 import org.obsidiantoaster.quickstart.service.Store;
 import org.obsidiantoaster.quickstart.service.impl.JdbcProductStore;
+
+import static org.obsidiantoaster.quickstart.Representations.getLink;
+import static org.obsidiantoaster.quickstart.Representations.error;
+import static org.obsidiantoaster.quickstart.Representations.withLinks;
 
 public class RestApplication extends AbstractVerticle {
 
@@ -82,34 +87,44 @@ public class RestApplication extends AbstractVerticle {
   private void retrieveAll(RoutingContext ctx) {
     store.readAll(readAll -> {
       if (readAll.failed()) {
-        ctx.fail(readAll.cause());
+        error(ctx, 400, readAll.cause(), "/products");
       } else {
+        JsonArray res = new JsonArray();
+        for (int i = 0; i < readAll.result().size(); i++) {
+          JsonObject object = readAll.result().getJsonObject(i);
+          res.add(withLinks(object, object.getLong("id")));
+        }
         ctx.response()
           .putHeader("Content-Type", "application/json")
-          .end(readAll.result().encode());
+          .end(new JsonObject()
+            .put("items", res)
+            .put("_links", new JsonArray()
+              .add(getLink("self", "GET", "/products", "Retrieve all products"))
+              .add(getLink("product/new", "PUT", "/products", "Create a new product"))
+              .add(getLink("product/get", "GET", "/products/:id", "Get a specific product")))
+            .encodePrettily());
       }
     });
   }
 
+
   private void getOne(RoutingContext ctx) {
     long id = getId(ctx);
     if (id == -1) {
-      ctx.fail(400);
+      error(ctx, 400, "invalid id", "/products/:id");
       return;
     }
 
     store.read(id, read -> {
       if (read.failed()) {
-        ctx.fail(read.cause());
+        error(ctx, 400, read.cause(), "/products/" + id);
       } else {
         if (read.result() == null) {
-          ctx.response()
-            .setStatusCode(404)
-            .end();
+          error(ctx, 404, "unknown product", "/products/" + id);
         } else {
           ctx.response()
             .putHeader("Content-Type", "application/json")
-            .end(read.result().encode());
+            .end(withLinks(read.result(), id).encodePrettily());
         }
       }
     });
@@ -120,24 +135,24 @@ public class RestApplication extends AbstractVerticle {
     try {
       item = ctx.getBodyAsJson();
     } catch (RuntimeException e) {
-      ctx.fail(e);
+      error(ctx, 400, "invalid payload", "/products");
       return;
     }
 
     if (item == null) {
-      ctx.fail(400);
+      error(ctx, 400, "invalid payload", "/products");
       return;
     }
 
     store.create(item, create -> {
       if (create.failed()) {
-        ctx.fail(create.cause());
+        error(ctx, 409, create.cause(), "/products");
       } else {
         ctx.response()
           .putHeader("Location", "/products/" + create.result())
           .putHeader("Content-Type", "application/json")
           .setStatusCode(201)
-          .end(create.result().encode());
+          .end(withLinks(create.result(), create.result().getLong("id")).encode());
       }
     });
   }
@@ -145,7 +160,7 @@ public class RestApplication extends AbstractVerticle {
   private void updateOne(RoutingContext ctx) {
     long id = getId(ctx);
     if (id == -1) {
-      ctx.fail(400);
+      error(ctx, 404, "unknown product", "/products/:id");
       return;
     }
 
@@ -153,22 +168,23 @@ public class RestApplication extends AbstractVerticle {
     try {
       item = ctx.getBodyAsJson();
     } catch (RuntimeException e) {
-      ctx.fail(e);
+      error(ctx, 400, "invalid payload", "/products/:id");
       return;
     }
 
     if (item == null) {
-      ctx.response().setStatusCode(400).end();
+      error(ctx, 422, "invalid payload", "/products/:id");
       return;
     }
 
     store.update(id, item, update -> {
       if (update.failed()) {
-        ctx.fail(update.cause());
+        error(ctx, 409, update.cause(), "/products/" + id);
       } else {
         ctx.response()
-          .setStatusCode(204)
-          .end();
+          .putHeader("Content-Type", "application/json")
+          .setStatusCode(200)
+          .end(withLinks(item.put("id", id), id).encodePrettily());
       }
     });
   }
@@ -176,13 +192,13 @@ public class RestApplication extends AbstractVerticle {
   private void deleteOne(RoutingContext ctx) {
     long id = getId(ctx);
     if (id == -1) {
-      ctx.fail(400);
+      error(ctx, 404, "unknown product", "/products/:id");
       return;
     }
 
     store.delete(id, delete -> {
       if (delete.failed()) {
-        ctx.fail(delete.cause());
+        error(ctx, 400, delete.cause(), "/products/" + id);
       } else {
         ctx.response()
           .setStatusCode(204)

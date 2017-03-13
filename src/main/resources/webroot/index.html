@@ -73,7 +73,7 @@
           method: 'GET',
           url: 'products'
         }).then(function successCallback(response) {
-          $scope.products = response.data;
+          $scope.products = response.data.items;
         }, function errorCallback(response) {
           console.log(response.statusText);
         });
