@@ -46,9 +46,6 @@
     <vertx-maven-plugin.version>1.0.4</vertx-maven-plugin.version>
 
     <vertx.verticle>org.obsidiantoaster.quickstart.RestApplication</vertx.verticle>
-
-    <arquillian-cube.version>1.0.0.Alpha19</arquillian-cube.version>
-    <arquillian.version>1.1.12.Final</arquillian.version>
   </properties>
 
   <dependencyManagement>
@@ -59,22 +56,6 @@
         <version>${vertx.version}</version>
         <type>pom</type>
         <scope>import</scope>
-      </dependency>
-
-      <dependency>
-        <groupId>org.arquillian.cube</groupId>
-        <artifactId>arquillian-cube-bom</artifactId>
-        <version>${arquillian-cube.version}</version>
-        <scope>import</scope>
-        <type>pom</type>
-      </dependency>
-
-      <dependency>
-        <groupId>org.jboss.arquillian</groupId>
-        <artifactId>arquillian-bom</artifactId>
-        <version>${arquillian.version}</version>
-        <scope>import</scope>
-        <type>pom</type>
       </dependency>
     </dependencies>
   </dependencyManagement>
@@ -122,24 +103,21 @@
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>org.arquillian.cube</groupId>
-      <artifactId>arquillian-cube-openshift</artifactId>
+      <groupId>com.jayway.restassured</groupId>
+      <artifactId>rest-assured</artifactId>
+      <version>2.9.0</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>io.fabric8</groupId>
+      <artifactId>openshift-client</artifactId>
+      <version>1.4.34</version>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>com.jayway.awaitility</groupId>
       <artifactId>awaitility</artifactId>
       <version>1.7.0</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.arquillian.cube</groupId>
-      <artifactId>arquillian-cube-kubernetes</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.jboss.arquillian.junit</groupId>
-      <artifactId>arquillian-junit-container</artifactId>
       <scope>test</scope>
     </dependency>
   </dependencies>
@@ -229,14 +207,7 @@
             </executions>
             <configuration>
               <systemProperties>
-                <!--
-                This property is set by the fabric8 maven plugin as the Openshift,
-                as the OpenShift project in which the image has been pushed, it's
-                also the current project.
-                 -->
-                <namespace.use.existing>${docker.image.user}</namespace.use.existing>
-                <namespace.lazy.enabled>false</namespace.lazy.enabled>
-                <env.init.enabled>false</env.init.enabled>
+                <app.name>${project.artifactId}</app.name>
               </systemProperties>
             </configuration>
           </plugin>
