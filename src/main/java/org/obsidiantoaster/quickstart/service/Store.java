@@ -16,24 +16,23 @@
  */
 package org.obsidiantoaster.quickstart.service;
 
-import io.vertx.core.AsyncResult;
-import io.vertx.core.Handler;
-import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
+import rx.Completable;
+import rx.Observable;
+import rx.Single;
 
 /**
  * A CRUD to SQL interface
- * @author Paulo Lopes
  */
 public interface Store {
 
-    void create(JsonObject item, Handler<AsyncResult<JsonObject>> handler);
+  Single<JsonObject> create(JsonObject item);
 
-    void readAll(Handler<AsyncResult<JsonArray>> handler);
+  Observable<JsonObject> readAll();
 
-    void read(long id, Handler<AsyncResult<JsonObject>> handler);
+  Single<JsonObject> read(long id);
 
-    void update(long id, JsonObject item, Handler<AsyncResult<Void>> handler);
+  Completable update(long id, JsonObject item);
 
-    void delete(long id, Handler<AsyncResult<Void>> handler);
+  Completable delete(long id);
 }

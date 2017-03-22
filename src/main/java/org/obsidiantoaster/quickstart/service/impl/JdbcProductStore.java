@@ -16,41 +16,34 @@
  */
 package org.obsidiantoaster.quickstart.service.impl;
 
-import io.vertx.core.AsyncResult;
-import io.vertx.core.Future;
-import io.vertx.core.Handler;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
-import io.vertx.ext.jdbc.JDBCClient;
+import io.vertx.ext.sql.ResultSet;
+import io.vertx.rxjava.ext.jdbc.JDBCClient;
+import io.vertx.rxjava.ext.sql.SQLRowStream;
 import org.obsidiantoaster.quickstart.service.Store;
+import rx.Completable;
+import rx.Observable;
+import rx.Single;
 
-import java.util.List;
+import java.util.NoSuchElementException;
 
 /**
  * The implementation of the store.
+ *
  * @author Paulo Lopes
  */
 public class JdbcProductStore implements Store {
 
-  private static final
-  // language=sql
-    String INSERT = "INSERT INTO products (name, stock) VALUES (?, ?::BIGINT)";
+  private static final String INSERT = "INSERT INTO products (name, stock) VALUES (?, ?::BIGINT)";
 
-  private static final
-  // language=sql
-    String SELECT_ONE = "SELECT * FROM products WHERE id = ?";
+  private static final String SELECT_ONE = "SELECT * FROM products WHERE id = ?";
 
-  private static final
-  // language=sql
-    String SELECT_ALL = "SELECT * FROM products";
+  private static final String SELECT_ALL = "SELECT * FROM products";
 
-  private static final
-  // language=sql
-    String UPDATE = "UPDATE products SET name = ?, stock = ?::BIGINT WHERE id = ?";
+  private static final String UPDATE = "UPDATE products SET name = ?, stock = ?::BIGINT WHERE id = ?";
 
-  private static final
-  // language=sql
-    String DELETE = "DELETE FROM products WHERE id = ?";
+  private static final String DELETE = "DELETE FROM products WHERE id = ?";
 
   private final JDBCClient db;
 
@@ -59,108 +52,107 @@ public class JdbcProductStore implements Store {
   }
 
   @Override
-  public void create(JsonObject item, Handler<AsyncResult<JsonObject>> handler) {
-    db.getConnection(res -> {
-      if (res.failed()) {
-        handler.handle(Future.failedFuture(res.cause()));
-      } else {
-        res.result().updateWithParams(INSERT, new JsonArray().add(item.getValue("name")).add(item.getValue("stock")), insert -> {
-          // close the connection
-          res.result().close();
+  public Single<JsonObject> create(JsonObject item) {
+    if (item == null) {
+      return Single.error(new IllegalArgumentException("The item must not be null"));
+    }
+    if (item.getString("name") == null || item.getString("name").isEmpty()) {
+      return Single.error(new IllegalArgumentException("The name must not be null or empty"));
+    }
+    if (item.getInteger("stock", 0) < 0) {
+      return Single.error(new IllegalArgumentException("The stock must greater or equal to 0"));
+    }
+    if (item.containsKey("id")) {
+      return Single.error(new IllegalArgumentException("The created item already contains an 'id'"));
+    }
 
-          if (insert.failed()) {
-            handler.handle(Future.failedFuture(insert.cause()));
-          } else {
-            handler.handle(Future.succeededFuture(item.put("id", insert.result().getKeys().getLong(0))));
-          }
-        });
-      }
-    });
-
+    return db.rxGetConnection()
+      .flatMap(conn -> {
+        JsonArray params = new JsonArray().add(item.getValue("name")).add(item.getValue("stock", 0));
+        return conn
+          .rxUpdateWithParams(INSERT, params)
+          .map(ur -> item.put("id", ur.getKeys().getLong(0)))
+          .doAfterTerminate(conn::close);
+      });
   }
 
   @Override
-  public void readAll(Handler<AsyncResult<JsonArray>> handler) {
-    db.getConnection(res -> {
-      if (res.failed()) {
-        handler.handle(Future.failedFuture(res.cause()));
-      } else {
-        res.result().query(SELECT_ALL, select -> {
-          // close the connection
-          res.result().close();
-
-          if (select.failed()) {
-            handler.handle(Future.failedFuture(select.cause()));
-          } else {
-            handler.handle(Future.succeededFuture(new JsonArray(select.result().getRows())));
-          }
-        });
-      }
-    });
+  public Observable<JsonObject> readAll() {
+    return db.rxGetConnection()
+      .flatMapObservable(conn ->
+        conn
+          .rxQueryStream(SELECT_ALL)
+          .flatMapObservable(SQLRowStream::toObservable)
+          .doAfterTerminate(conn::close))
+      .map(array ->
+        new JsonObject()
+          .put("id", array.getLong(0))
+          .put("name", array.getString(1))
+          .put("stock", array.getInteger(2))
+      );
   }
 
   @Override
-  public void read(long id, Handler<AsyncResult<JsonObject>> handler) {
-    db.getConnection(res -> {
-      if (res.failed()) {
-        handler.handle(Future.failedFuture(res.cause()));
-      } else {
-        res.result().queryWithParams(SELECT_ONE, new JsonArray().add(id), select -> {
-          // close the connection
-          res.result().close();
-
-          if (select.failed()) {
-            handler.handle(Future.failedFuture(select.cause()));
-          } else {
-            List<JsonObject> rows = select.result().getRows();
-            if (rows.size() > 0) {
-              handler.handle(Future.succeededFuture(rows.get(0)));
+  public Single<JsonObject> read(long id) {
+    return db.rxGetConnection()
+      .flatMap(conn -> {
+        JsonArray param = new JsonArray().add(id);
+        return conn
+          .rxQueryWithParams(SELECT_ONE, param)
+          .map(ResultSet::getRows)
+          .flatMap(list -> {
+            if (list.isEmpty()) {
+              return Single.error(new NoSuchElementException("Item '" + id + "' not found"));
             } else {
-              handler.handle(Future.succeededFuture());
+              return Single.just(list.get(0));
             }
-          }
-        });
-      }
-    });
+          })
+          .doAfterTerminate(conn::close);
+      });
   }
 
   @Override
-  public void update(long id, JsonObject item, Handler<AsyncResult<Void>> handler) {
-    db.getConnection(res -> {
-      if (res.failed()) {
-        handler.handle(Future.failedFuture(res.cause()));
-      } else {
-        res.result().updateWithParams(UPDATE, new JsonArray().add(item.getValue("name")).add(item.getValue("stock")).add(id), update -> {
-          // close the connection
-          res.result().close();
+  public Completable update(long id, JsonObject item) {
+    if (item == null) {
+      return Completable.error(new IllegalArgumentException("The item must not be null"));
+    }
+    if (item.getString("name") == null || item.getString("name").isEmpty()) {
+      return Completable.error(new IllegalArgumentException("The name must not be null or empty"));
+    }
+    if (item.getInteger("stock", 0) < 0) {
+      return Completable.error(new IllegalArgumentException("The stock must greater or equal to 0"));
+    }
+    if (item.containsKey("id") && id != item.getInteger("id")) {
+      return Completable.error(new IllegalArgumentException("The 'id' cannot be changed"));
+    }
 
-          if (update.failed()) {
-            handler.handle(Future.failedFuture(update.cause()));
-          } else {
-            handler.handle(Future.succeededFuture());
-          }
-        });
-      }
-    });
+    return db.rxGetConnection()
+      .flatMapCompletable(conn -> {
+        JsonArray params = new JsonArray().add(item.getValue("name")).add(item.getValue("stock", 0)).add(id);
+        return conn.rxUpdateWithParams(UPDATE, params)
+          .flatMapCompletable(up -> {
+            if (up.getUpdated() == 0) {
+              return Completable.error(new NoSuchElementException("Unknown item '" + id + "'"));
+            }
+            return Completable.complete();
+          })
+          .doAfterTerminate(conn::close);
+      });
   }
 
   @Override
-  public void delete(long id, Handler<AsyncResult<Void>> handler) {
-    db.getConnection(res -> {
-      if (res.failed()) {
-        handler.handle(Future.failedFuture(res.cause()));
-      } else {
-        res.result().updateWithParams(DELETE, new JsonArray().add(id), delete -> {
-          // close the connection
-          res.result().close();
-
-          if (delete.failed()) {
-            handler.handle(Future.failedFuture(delete.cause()));
-          } else {
-            handler.handle(Future.succeededFuture());
-          }
-        });
-      }
-    });
+  public Completable delete(long id) {
+    return db.rxGetConnection()
+      .flatMapCompletable(conn -> {
+        JsonArray params = new JsonArray().add(id);
+        return conn.rxUpdateWithParams(DELETE, params)
+          .flatMapCompletable(up -> {
+            if (up.getUpdated() == 0) {
+              return Completable.error(new NoSuchElementException("Unknown item '" + id + "'"));
+            }
+            return Completable.complete();
+          })
+          .doAfterTerminate(conn::close);
+      });
   }
 }

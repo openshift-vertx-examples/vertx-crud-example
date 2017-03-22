@@ -24,12 +24,12 @@
     <version>21</version>
   </parent>
   <groupId>org.obsidiantoaster.quickstart</groupId>
-  <artifactId>vertx-jdbc</artifactId>
+  <artifactId>vertx-crud</artifactId>
   <version>1.0.0-SNAPSHOT</version>
   <packaging>jar</packaging>
 
-  <name>jdbc</name>
-  <description>Vertx - JDBC</description>
+  <name>crud</name>
+  <description>Vertx - CRUD</description>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -45,14 +45,14 @@
     <maven-failsafe-plugin.version>2.19.1</maven-failsafe-plugin.version>
     <vertx-maven-plugin.version>1.0.6</vertx-maven-plugin.version>
 
-    <vertx.verticle>org.obsidiantoaster.quickstart.RestApplication</vertx.verticle>
+    <vertx.verticle>org.obsidiantoaster.quickstart.CrudApplication</vertx.verticle>
   </properties>
 
   <dependencyManagement>
     <dependencies>
       <dependency>
         <groupId>io.vertx</groupId>
-        <artifactId>vertx-stack-depchain</artifactId>
+        <artifactId>vertx-dependencies</artifactId>
         <version>${vertx.version}</version>
         <type>pom</type>
         <scope>import</scope>
@@ -69,6 +69,11 @@
     <dependency>
       <groupId>io.vertx</groupId>
       <artifactId>vertx-jdbc-client</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>io.vertx</groupId>
+      <artifactId>vertx-rx-java</artifactId>
     </dependency>
 
     <dependency>
@@ -147,6 +152,9 @@
             </goals>
           </execution>
         </executions>
+        <configuration>
+          <redeploy>true</redeploy>
+        </configuration>
       </plugin>
     </plugins>
   </build>
