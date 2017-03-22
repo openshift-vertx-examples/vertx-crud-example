@@ -1,0 +1,188 @@
+##
+# The OpenShift template defining the build pipeline to deploy the application
+##
+apiVersion: v1
+kind: Template
+metadata:
+  name: vertx-crud-pipeline
+parameters:
+- name: APP_NAME
+  description: The name assigned to all of the application objects defined in this template.
+  displayName: Application Name
+  required: true
+  value: vertx-crud
+- name: GIT_SOURCE_URL
+  description: The source URL for the application
+  displayName: Source URL
+  required: true
+  value: git@github.com:obsidian-toaster-quickstarts/rest_jdbc_vertx.git
+- name: GIT_SOURCE_REF
+  description: The source Ref for the application
+  displayName: Source Ref
+  required: true
+  value: master
+- description: A secret string used to configure the GitHub webhook.
+  displayName: GitHub Webhook Secret
+  from: '[a-zA-Z0-9]{40}'
+  generate: expression
+  name: GITHUB_WEBHOOK_SECRET
+  required: true
+- description: A secret string used to configure the Generic webhook.
+  displayName: Generic Webhook Secret
+  from: '[a-zA-Z0-9]{40}'
+  generate: expression
+  name: GENERIC_WEBHOOK_SECRET
+  required: true
+
+##
+# Objects created by the template:
+# * An image stream containing the application
+# * A build config using the pipeline strategy
+# * A deployment config / replication controller instantiating 1 instance of the application
+# * A service to make the application available to other application running in OpenShift
+# * A route making the application accessible from outside OpenShift
+##
+objects:
+
+- apiVersion: v1
+  kind: ImageStream
+  metadata:
+    labels:
+      app: ${APP_NAME}
+    name: ${APP_NAME}
+  spec: {}
+  status:
+    dockerImageRepository: ""
+
+- apiVersion: v1
+  kind: BuildConfig
+  metadata:
+    annotations:
+      pipeline.alpha.openshift.io/uses: '[{"name": "${NAME}", "namespace": "", "kind": "DeploymentConfig"}]'
+    creationTimestamp: null
+    labels:
+      name: ${APP_NAME}
+    name: ${APP_NAME}
+  spec:
+    source:
+      type: "Git"
+      git:
+        uri: "${GIT_SOURCE_URL}"
+    strategy:
+      type: JenkinsPipeline
+      jenkinsPipelineStrategy:
+        jenkinsfilePath: ./Jenkinsfile
+    triggers:
+    - github:
+        secret: "${GITHUB_WEBHOOK_SECRET}"
+      type: GitHub
+    - generic:
+        secret: "${GENERIC_WEBHOOK_SECRET}"
+      type: Generic
+
+- apiVersion: v1
+  kind: DeploymentConfig
+  metadata:
+    labels:
+      app: ${APP_NAME}
+    name: ${APP_NAME}
+  spec:
+    replicas: 1
+    selector:
+      app: ${APP_NAME}
+      deploymentconfig: ${APP_NAME}
+    strategy:
+      rollingParams:
+        intervalSeconds: 1
+        maxSurge: 25%
+        maxUnavailable: 25%
+        timeoutSeconds: 600
+        updatePeriodSeconds: 1
+      type: Rolling
+    template:
+      metadata:
+        labels:
+          app: ${APP_NAME}
+          deploymentconfig: ${APP_NAME}
+      spec:
+        containers:
+        - image: ${APP_NAME}:latest
+          imagePullPolicy: Always
+          name: ${APP_NAME}
+          ports:
+          - containerPort: 8080
+            protocol: TCP
+          resources: {}
+          terminationMessagePath: /dev/termination-log
+          livenessProbe:
+            httpGet:
+              path: /api/greeting
+              port: 8080
+              scheme: HTTP
+            initialDelaySeconds: 10
+            timeoutSeconds: 2
+            periodSeconds: 10
+            successThreshold: 1
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /api/greeting
+              port: 8080
+              scheme: HTTP
+            initialDelaySeconds: 30
+            timeoutSeconds: 2
+            periodSeconds: 10
+            successThreshold: 1
+            failureThreshold: 3
+        dnsPolicy: ClusterFirst
+        restartPolicy: Always
+        securityContext: {}
+        terminationGracePeriodSeconds: 30
+    test: false
+    triggers:
+    - type: ConfigChange
+    - imageChangeParams:
+        automatic: true
+        containerNames:
+        - ${APP_NAME}
+        from:
+          kind: ImageStreamTag
+          name: ${APP_NAME}:latest
+      type: ImageChange
+
+- apiVersion: v1
+  kind: Service
+  metadata:
+    annotations:
+      openshift.io/generated-by: OpenShiftNewApp
+    labels:
+      app: ${APP_NAME}
+    name: ${APP_NAME}
+  spec:
+    ports:
+    - name: http
+      port: 8080
+      protocol: TCP
+      targetPort: 8080
+    selector:
+      app: ${APP_NAME}
+      deploymentconfig: ${APP_NAME}
+    sessionAffinity: None
+    type: ClusterIP
+  status:
+    loadBalancer: {}
+
+- apiVersion: v1
+  kind: Route
+  metadata:
+    name: ${APP_NAME}
+    labels:
+      app: ${APP_NAME}
+  spec:
+    to:
+      kind: Service
+      name: ${APP_NAME}
+      weight: 100
+    port:
+      targetPort: 8080
+    wildcardPolicy: None
