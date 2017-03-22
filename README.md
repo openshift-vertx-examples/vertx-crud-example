@@ -89,6 +89,7 @@ mvn fabric8:deploy -Popenshift
 
 The first command creates a PostgreSQL database. It's an ephemeral database, so the data is lost if you stop the 
 database. The second command builds and deploys the application to the OpenShift instance on which you are logged in.
+ The database credentials are store in an OpenShift secret deployed during the application deployment.
 
 Once deployed, you can access the application using the _application URL_. Retrieve it using:
 
