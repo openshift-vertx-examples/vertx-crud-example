@@ -1,4 +1,4 @@
-package org.obsidiantoaster.quickstart;
+package io.openshift.booster;
 
 import com.jayway.restassured.RestAssured;
 import io.fabric8.kubernetes.api.model.HasMetadata;

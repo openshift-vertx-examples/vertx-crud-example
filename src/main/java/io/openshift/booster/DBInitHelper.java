@@ -14,25 +14,32 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.obsidiantoaster.quickstart.service;
+package io.openshift.booster;
 
-import io.vertx.core.json.JsonObject;
+import io.vertx.rxjava.core.Vertx;
+import io.vertx.rxjava.ext.jdbc.JDBCClient;
 import rx.Completable;
 import rx.Observable;
-import rx.Single;
 
 /**
- * A CRUD to SQL interface
+ * Simple helper to bootstrap your Database.
+ *
+ * @author Paulo Lopes
  */
-public interface Store {
+public class DBInitHelper {
 
-  Single<JsonObject> create(JsonObject item);
+  private DBInitHelper() {
+    // Private constructor.
+  }
 
-  Observable<JsonObject> readAll();
-
-  Single<JsonObject> read(long id);
-
-  Completable update(long id, JsonObject item);
-
-  Completable delete(long id);
+  public static Completable initDatabase(Vertx vertx, JDBCClient jdbc) {
+    return jdbc.rxGetConnection()
+      .flatMapCompletable(connection ->
+        vertx.fileSystem().rxReadFile("ddl.sql")
+          .flatMapObservable(buffer -> Observable.from(buffer.toString().split(";")))
+          .flatMapSingle(connection::rxExecute)
+          .doAfterTerminate(connection::close)
+          .toCompletable()
+      );
+  }
 }

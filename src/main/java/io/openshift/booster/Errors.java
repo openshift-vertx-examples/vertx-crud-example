@@ -14,32 +14,30 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.obsidiantoaster.quickstart;
+package io.openshift.booster;
 
-import io.vertx.rxjava.core.Vertx;
-import io.vertx.rxjava.ext.jdbc.JDBCClient;
-import rx.Completable;
-import rx.Observable;
+import io.vertx.core.json.JsonObject;
+import io.vertx.rxjava.ext.web.RoutingContext;
 
 /**
- * Simple helper to bootstrap your Database.
- *
- * @author Paulo Lopes
+ * @author <a href="http://escoffier.me">Clement Escoffier</a>
  */
-public class DBInitHelper {
+public class Errors {
 
-  private DBInitHelper() {
-    // Private constructor.
+  public static void error(RoutingContext ctx, int status, String cause) {
+    JsonObject error = new JsonObject()
+      .put("error", cause)
+      .put("code", status)
+      .put("path", ctx.request().path());
+    ctx.response()
+      .putHeader("Content-Type", "application/json")
+      .setStatusCode(status)
+      .end(error.encodePrettily());
   }
 
-  public static Completable initDatabase(Vertx vertx, JDBCClient jdbc) {
-    return jdbc.rxGetConnection()
-      .flatMapCompletable(connection ->
-        vertx.fileSystem().rxReadFile("ddl.sql")
-          .flatMapObservable(buffer -> Observable.from(buffer.toString().split(";")))
-          .flatMapSingle(connection::rxExecute)
-          .doAfterTerminate(connection::close)
-          .toCompletable()
-      );
+  public static void error(RoutingContext ctx, int status, Throwable cause) {
+    error(ctx, status, cause.getMessage());
   }
+
+
 }

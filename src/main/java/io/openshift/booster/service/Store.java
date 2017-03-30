@@ -14,30 +14,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.obsidiantoaster.quickstart;
+package io.openshift.booster.service;
 
 import io.vertx.core.json.JsonObject;
-import io.vertx.rxjava.ext.web.RoutingContext;
+import rx.Completable;
+import rx.Observable;
+import rx.Single;
 
 /**
- * @author <a href="http://escoffier.me">Clement Escoffier</a>
+ * A CRUD to SQL interface
  */
-public class Errors {
+public interface Store {
 
-  public static void error(RoutingContext ctx, int status, String cause) {
-    JsonObject error = new JsonObject()
-      .put("error", cause)
-      .put("code", status)
-      .put("path", ctx.request().path());
-    ctx.response()
-      .putHeader("Content-Type", "application/json")
-      .setStatusCode(status)
-      .end(error.encodePrettily());
-  }
+  Single<JsonObject> create(JsonObject item);
 
-  public static void error(RoutingContext ctx, int status, Throwable cause) {
-    error(ctx, status, cause.getMessage());
-  }
+  Observable<JsonObject> readAll();
 
+  Single<JsonObject> read(long id);
 
+  Completable update(long id, JsonObject item);
+
+  Completable delete(long id);
 }

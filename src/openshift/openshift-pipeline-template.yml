@@ -15,7 +15,7 @@ parameters:
   description: The source URL for the application
   displayName: Source URL
   required: true
-  value: https://github.com/obsidian-toaster-quickstarts/rest_jdbc_vertx.git
+  value: https://github.com/openshiftio-vertx-boosters/vertx-crud-booster.git
 - name: GIT_SOURCE_REF
   description: The source Ref for the application
   displayName: Source Ref

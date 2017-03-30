@@ -14,8 +14,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.obsidiantoaster.quickstart;
+package io.openshift.booster;
 
+import io.openshift.booster.service.Store;
+import io.openshift.booster.service.impl.JdbcProductStore;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.rxjava.core.AbstractVerticle;
@@ -26,13 +28,11 @@ import io.vertx.rxjava.ext.web.Router;
 import io.vertx.rxjava.ext.web.RoutingContext;
 import io.vertx.rxjava.ext.web.handler.BodyHandler;
 import io.vertx.rxjava.ext.web.handler.StaticHandler;
-import org.obsidiantoaster.quickstart.service.Store;
-import org.obsidiantoaster.quickstart.service.impl.JdbcProductStore;
 import rx.Single;
 
 import java.util.NoSuchElementException;
 
-import static org.obsidiantoaster.quickstart.Errors.error;
+import static io.openshift.booster.Errors.error;
 
 public class CrudApplication extends AbstractVerticle {
 

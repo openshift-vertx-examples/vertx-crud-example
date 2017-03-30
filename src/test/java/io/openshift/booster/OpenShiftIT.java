@@ -1,4 +1,4 @@
-package org.obsidiantoaster.quickstart;
+package io.openshift.booster;
 
 import com.jayway.restassured.RestAssured;
 import com.jayway.restassured.response.Response;

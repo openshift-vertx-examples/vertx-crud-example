@@ -14,14 +14,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.obsidiantoaster.quickstart.service.impl;
+package io.openshift.booster.service.impl;
 
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.sql.ResultSet;
 import io.vertx.rxjava.ext.jdbc.JDBCClient;
 import io.vertx.rxjava.ext.sql.SQLRowStream;
-import org.obsidiantoaster.quickstart.service.Store;
+import io.openshift.booster.service.Store;
 import rx.Completable;
 import rx.Observable;
 import rx.Single;
