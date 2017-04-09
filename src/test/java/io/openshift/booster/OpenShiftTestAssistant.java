@@ -3,6 +3,7 @@ package io.openshift.booster;
 import com.jayway.restassured.RestAssured;
 import io.fabric8.kubernetes.api.model.HasMetadata;
 import io.fabric8.kubernetes.api.model.Pod;
+import io.fabric8.kubernetes.api.model.ReplicationController;
 import io.fabric8.kubernetes.client.DefaultKubernetesClient;
 import io.fabric8.kubernetes.client.dsl.NamespaceListVisitFromServerGetDeleteRecreateWaitApplicable;
 import io.fabric8.openshift.api.model.DeploymentConfig;
@@ -28,7 +29,7 @@ public class OpenShiftTestAssistant {
     private final OpenShiftClient client;
     private final String project;
     private String applicationName;
-    private Map<String, NamespaceListVisitFromServerGetDeleteRecreateWaitApplicable<HasMetadata, Boolean>> created
+    private Map<String, List<HasMetadata>> created
         = new LinkedHashMap<>();
 
     public OpenShiftTestAssistant() {
@@ -40,7 +41,7 @@ public class OpenShiftTestAssistant {
         try (FileInputStream fis = new FileInputStream(template)) {
             NamespaceListVisitFromServerGetDeleteRecreateWaitApplicable<HasMetadata, Boolean> declarations = client.load(fis);
             List<HasMetadata> entities = declarations.createOrReplace();
-            created.put(name, declarations);
+            created.put(name, entities);
             System.out.println(name + " deployed, " + entities.size() + " object(s) created.");
 
             return entities;
@@ -74,12 +75,19 @@ public class OpenShiftTestAssistant {
         List<String> keys = new ArrayList<>(created.keySet());
         Collections.reverse(keys);
         for (String key : keys) {
-            System.out.println("Deleting " + key);
-            created.remove(key).delete();
+          created.remove(key)
+            .stream()
+            .sorted(Comparator.comparing(HasMetadata::getKind))
+            .forEach(metadata -> {
+              boolean isDeploymentConfigOrReplicationController = metadata instanceof DeploymentConfig || metadata instanceof ReplicationController;
+              System.out.println(String.format("Deleting %s : %s", key, metadata.getKind()));
+              client.resource(metadata).withGracePeriod(0).cascading(!isDeploymentConfigOrReplicationController).delete();
+            });
         }
     }
 
-    public void awaitApplicationReadinessOrFail() {
+
+  public void awaitApplicationReadinessOrFail() {
         await().atMost(5, TimeUnit.MINUTES).until(() -> {
                 List<Pod> list = client.pods().inNamespace(project).list().getItems();
                 return list.stream().filter(pod ->
