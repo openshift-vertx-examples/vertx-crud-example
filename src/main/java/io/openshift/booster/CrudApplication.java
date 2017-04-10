@@ -91,7 +91,7 @@ public class CrudApplication extends AbstractVerticle {
     store.readAll()
       .subscribe(
         res::add,
-        err -> error(ctx, 400, err),
+        err -> error(ctx, 415, err),
         () -> response.end(res.encodePrettily())
       );
   }
@@ -114,7 +114,7 @@ public class CrudApplication extends AbstractVerticle {
           if (err instanceof NoSuchElementException) {
             error(ctx, 404, err);
           } else if (err instanceof IllegalArgumentException) {
-            error(ctx, 400, err);
+            error(ctx, 415, err);
           } else {
             error(ctx, 500, err);
           }
@@ -127,12 +127,12 @@ public class CrudApplication extends AbstractVerticle {
     try {
       item = ctx.getBodyAsJson();
     } catch (RuntimeException e) {
-      error(ctx, 400, "invalid payload");
+      error(ctx, 415, "invalid payload");
       return;
     }
 
     if (item == null) {
-      error(ctx, 400, "invalid payload");
+      error(ctx, 415, "invalid payload");
       return;
     }
 
@@ -159,12 +159,12 @@ public class CrudApplication extends AbstractVerticle {
     try {
       item = ctx.getBodyAsJson();
     } catch (RuntimeException e) {
-      error(ctx, 400, "invalid payload");
+      error(ctx, 415, "invalid payload");
       return;
     }
 
     if (item == null) {
-      error(ctx, 400, "invalid payload");
+      error(ctx, 415, "invalid payload");
       return;
     }
 
@@ -206,7 +206,7 @@ public class CrudApplication extends AbstractVerticle {
           if (err instanceof NoSuchElementException) {
             error(ctx, 404, err);
           } else {
-            error(ctx, 400, err);
+            error(ctx, 415, err);
           }
         }
       );

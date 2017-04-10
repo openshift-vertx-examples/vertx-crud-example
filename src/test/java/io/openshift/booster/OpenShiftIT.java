@@ -90,7 +90,14 @@ public class OpenShiftIT {
     JsonArray json = new JsonArray(payload);
     assertThat(json).hasSize(1);
     assertThat(json.getJsonObject(0).getMap()).contains(entry("name", "apple"), entry("stock", 5));
-    assertThat(json.getJsonObject(0).getLong("id")).isNotNull().isGreaterThanOrEqualTo(0);
+    Long id = json.getJsonObject(0).getLong("id");
+    assertThat(id).isNotNull().isGreaterThanOrEqualTo(0);
+
+    payload = get("/" + id).then().assertThat().statusCode(200).extract().asString();
+    JsonObject obj = new JsonObject(payload);
+    assertThat(obj.getMap()).contains(entry("name", "apple"), entry("stock", 5));
+    assertThat(obj.getLong("id")).isNotNull().isGreaterThanOrEqualTo(id);
+
   }
 
   @Test
@@ -144,7 +151,7 @@ public class OpenShiftIT {
     Response response = given()
       .body("")
       .post()
-      .then().assertThat().statusCode(400).extract().response();
+      .then().assertThat().statusCode(415).extract().response();
 
     JsonObject result = new JsonObject(response.asString());
     assertThat(result.getString("error")).isNotBlank();
@@ -156,7 +163,7 @@ public class OpenShiftIT {
     Response response = given()
       .body("<name>apple</name><stock>22</stock>")
       .post()
-      .then().assertThat().statusCode(400).extract().response();
+      .then().assertThat().statusCode(415).extract().response();
 
     JsonObject result = new JsonObject(response.asString());
     assertThat(result.getString("error")).isNotBlank();
@@ -232,7 +239,7 @@ public class OpenShiftIT {
     response = given()
       .body("")
       .put("/" + id)
-      .then().assertThat().statusCode(400).extract().response();
+      .then().assertThat().statusCode(415).extract().response();
 
     result = new JsonObject(response.asString());
     assertThat(result.getString("error")).isNotBlank();
@@ -252,7 +259,7 @@ public class OpenShiftIT {
     response = given()
       .body("{\"name\":\"pear\", \"stock\":") // not complete on purpose.
       .put("/" + id)
-      .then().assertThat().statusCode(400).extract().response();
+      .then().assertThat().statusCode(415).extract().response();
 
     result = new JsonObject(response.asString());
     assertThat(result.getString("error")).isNotBlank();
