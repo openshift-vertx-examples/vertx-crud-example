@@ -2,6 +2,7 @@ package io.openshift.booster;
 
 import com.jayway.restassured.RestAssured;
 import com.jayway.restassured.response.Response;
+import io.openshift.booster.test.OpenShiftTestAssistant;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import org.junit.AfterClass;
