@@ -1,1 +1,1 @@
-http://openshiftio-appdev-docs-appdev-documentation.tsrv.devshift.net/mission-crud-vertx.html
+http://appdev.openshift.io/docs/mission-crud-vertx.html
