@@ -104,7 +104,7 @@
       }
 
       function _error(response) {
-        console.error(response.statusText);
+        alert(response.data.error || response.statusText);
       }
 
       //Clear the form
