@@ -219,12 +219,12 @@ public class OpenShiftIT {
   public void testEditingAnUnknownFruitWithStringId() {
     Response response = given()
       .body(new JsonObject().put("name", "pear").put("stock", 10).encode())
-      .put("/foo")
+      .put("/999999")
       .then().assertThat().statusCode(404).extract().response();
 
     JsonObject result = new JsonObject(response.asString());
     assertThat(result.getString("error")).isNotBlank();
-    assertThat(result.getString("path")).isEqualTo("/api/fruits/foo");
+    assertThat(result.getString("path")).isEqualTo("/api/fruits/999999");
   }
 
   @Test
@@ -307,7 +307,7 @@ public class OpenShiftIT {
 
   @Test
   public void testDeletingAnUnknownFruit() {
-    delete("/unknown")
+    delete("/99999")
       .then().assertThat().statusCode(404);
 
     get()

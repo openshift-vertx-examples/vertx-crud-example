@@ -172,7 +172,6 @@ public class CrudApplication extends AbstractVerticle {
   }
 
   private void deleteOne(RoutingContext ctx) {
-
     store.delete(ctx.get("fruitId"))
       .subscribe(
         () ->
