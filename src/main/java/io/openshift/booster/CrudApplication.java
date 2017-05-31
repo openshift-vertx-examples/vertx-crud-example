@@ -26,16 +26,17 @@ public class CrudApplication extends AbstractVerticle {
   public void start() {
     // Create a router object.
     Router router = Router.router(vertx);
-    // implement a basic REST CRUD mapping
-    router.get("/api/fruits").handler(this::retrieveAll);
-    router.get("/api/fruits/:id").handler(this::getOne);
-
-
     // enable parsing of request bodies
     router.route().handler(BodyHandler.create());
+    // perform validation of the :id parameter
+    router.route("/api/fruits/:id").handler(this::validateId);
+    // implement a basic REST CRUD mapping
+    router.get("/api/fruits").handler(this::retrieveAll);
     router.post("/api/fruits").handler(this::addOne);
+    router.get("/api/fruits/:id").handler(this::getOne);
     router.put("/api/fruits/:id").handler(this::updateOne);
     router.delete("/api/fruits/:id").handler(this::deleteOne);
+
     // health check
     router.get("/health").handler(rc -> rc.response().end("OK"));
     // web interface
@@ -47,7 +48,7 @@ public class CrudApplication extends AbstractVerticle {
       .put("url", "jdbc:postgresql://" + getEnv("MY_DATABASE_SERVICE_HOST", "localhost") + ":5432/my_data")
       .put("driver_class", "org.postgresql.Driver")
       .put("user", getEnv("DB_USERNAME", "user"))
-      .put("password", getEnv("DB_PASSWORD", "password "))
+      .put("password", getEnv("DB_PASSWORD", "password"))
     );
 
     DBInitHelper.initDatabase(vertx, jdbc)
@@ -67,6 +68,15 @@ public class CrudApplication extends AbstractVerticle {
       .rxListen(8080);
   }
 
+  private void validateId(RoutingContext ctx) {
+    try {
+      ctx.put("fruitId", Long.parseLong(ctx.pathParam("id")));
+      // continue with the next handler in the route
+      ctx.next();
+    } catch (NumberFormatException e) {
+      error(ctx, 400, "invalid id: " + e.getCause());
+    }
+  }
 
   private void retrieveAll(RoutingContext ctx) {
     HttpServerResponse response = ctx.response()
@@ -85,13 +95,7 @@ public class CrudApplication extends AbstractVerticle {
     HttpServerResponse response = ctx.response()
       .putHeader("Content-Type", "application/json");
 
-    long id = getId(ctx);
-    if (id == -1) {
-      error(ctx, 400, "invalid id");
-      return;
-    }
-
-    store.read(id)
+    store.read(ctx.get("fruitId"))
       .subscribe(
         json -> response.end(json.encodePrettily()),
         err -> {
@@ -124,7 +128,7 @@ public class CrudApplication extends AbstractVerticle {
       .subscribe(
         json ->
           ctx.response()
-            .putHeader("Location", "/api/fruits/" + json.getInteger("id"))
+            .putHeader("Location", "/api/fruits/" + json.getLong("id"))
             .putHeader("Content-Type", "application/json")
             .setStatusCode(201)
             .end(json.encodePrettily()),
@@ -133,12 +137,6 @@ public class CrudApplication extends AbstractVerticle {
   }
 
   private void updateOne(RoutingContext ctx) {
-    long id = getId(ctx);
-    if (id == -1) {
-      error(ctx, 404, "unknown fruit");
-      return;
-    }
-
     JsonObject item;
     try {
       item = ctx.getBodyAsJson();
@@ -152,13 +150,13 @@ public class CrudApplication extends AbstractVerticle {
       return;
     }
 
-    store.update(id, item)
+    store.update(ctx.get("fruitId"), item)
       .subscribe(
         () ->
           ctx.response()
             .putHeader("Content-Type", "application/json")
             .setStatusCode(200)
-            .end(item.put("id", id).encodePrettily()),
+            .end(item.put("id", ctx.<Long>get("fruitId")).encodePrettily()),
         err -> writeError(ctx, err)
       );
   }
@@ -174,13 +172,8 @@ public class CrudApplication extends AbstractVerticle {
   }
 
   private void deleteOne(RoutingContext ctx) {
-    long id = getId(ctx);
-    if (id == -1) {
-      error(ctx, 404, "unknown product");
-      return;
-    }
 
-    store.delete(id)
+    store.delete(ctx.get("fruitId"))
       .subscribe(
         () ->
           ctx.response()
@@ -194,14 +187,6 @@ public class CrudApplication extends AbstractVerticle {
           }
         }
       );
-  }
-
-  private long getId(RoutingContext ctx) {
-    try {
-      return Long.parseLong(ctx.pathParam("id"));
-    } catch (NumberFormatException e) {
-      return -1;
-    }
   }
 
   private String getEnv(String key, String dv) {
