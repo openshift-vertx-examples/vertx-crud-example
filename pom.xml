@@ -33,7 +33,7 @@
   <description>Vertx - CRUD</description>
 
   <properties>
-    <vertx.version>3.4.1</vertx.version>
+    <vertx.version>3.4.2</vertx.version>
     <slf4j.version>1.7.21</slf4j.version>
     <vertx-maven-plugin.version>1.0.8</vertx-maven-plugin.version>
     <vertx.verticle>io.openshift.booster.CrudApplication</vertx.verticle>
