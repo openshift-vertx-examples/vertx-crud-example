@@ -1,1 +1,1 @@
-http://appdev.openshift.io/docs/mission-crud-vertx.html
+http://appdev.openshift.io/docs/vertx-runtime.html#mission-crud-vertx
