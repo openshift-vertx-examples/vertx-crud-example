@@ -95,14 +95,10 @@ objects:
   kind: Service
   metadata:
     annotations:
-      fabric8.io/scm-con-url: scm:git:https://github.com/openshiftio/booster-parent.git/crud-vertx
-      prometheus.io/port: "9779"
-      fabric8.io/scm-url: https://github.com/openshiftio/crud-vertx
       fabric8.io/iconUrl: img/icons/vertx.svg
       fabric8.io/git-branch: master
       prometheus.io/scrape: "true"
-      fabric8.io/scm-devcon-url: scm:git:git:@github.com:openshiftio/booster-parent.git/crud-vertx
-      fabric8.io/scm-tag: booster-parent-9
+      prometheus.io/port: "9779"
     labels:
       expose: "true"
       app: crud-vertx
@@ -124,13 +120,9 @@ objects:
   kind: DeploymentConfig
   metadata:
     annotations:
-      fabric8.io/metrics-path: dashboard/file/kubernetes-pods.json/?var-project=crud-vertx&var-version=13-SNAPSHOT
-      fabric8.io/scm-con-url: scm:git:https://github.com/openshiftio/booster-parent.git/crud-vertx
-      fabric8.io/scm-url: https://github.com/openshiftio/crud-vertx
       fabric8.io/iconUrl: img/icons/vertx.svg
       fabric8.io/git-branch: master
-      fabric8.io/scm-devcon-url: scm:git:git:@github.com:openshiftio/booster-parent.git/crud-vertx
-      fabric8.io/scm-tag: booster-parent-9
+      fabric8.io/metrics-path: dashboard/file/kubernetes-pods.json/?var-project=crud-vertx&var-version=13-SNAPSHOT
     labels:
       app: crud-vertx
       provider: fabric8
@@ -150,13 +142,9 @@ objects:
     template:
       metadata:
         annotations:
-          fabric8.io/metrics-path: dashboard/file/kubernetes-pods.json/?var-project=crud-vertx&var-version=13-SNAPSHOT
-          fabric8.io/scm-con-url: scm:git:https://github.com/openshiftio/booster-parent.git/crud-vertx
-          fabric8.io/scm-url: https://github.com/openshiftio/crud-vertx
           fabric8.io/iconUrl: img/icons/vertx.svg
           fabric8.io/git-branch: master
-          fabric8.io/scm-devcon-url: scm:git:git:@github.com:openshiftio/booster-parent.git/crud-vertx
-          fabric8.io/scm-tag: booster-parent-9
+          fabric8.io/metrics-path: dashboard/file/kubernetes-pods.json/?var-project=crud-vertx&var-version=13-SNAPSHOT
         labels:
           app: crud-vertx
           provider: fabric8
