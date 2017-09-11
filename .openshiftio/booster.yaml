@@ -1,2 +1,7 @@
 name: Vert.x CRUD Example using JDBC
 description: Runs a Vert.x application exposing a HTTP endpoint proposing CRUD operations implemented on top of JDBC
+versions:
+  - id: community
+    name: 3.4.2.Final (Community)
+  - id: redhat
+    name: 3.4.2.redhat-4 (RHOAR)

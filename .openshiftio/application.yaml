@@ -131,6 +131,7 @@ objects:
     name: crud-vertx
   spec:
     replicas: 1
+    revisionHistoryLimit: 2
     selector:
       app: crud-vertx
       provider: fabric8
@@ -167,10 +168,6 @@ objects:
             valueFrom:
               fieldRef:
                 fieldPath: metadata.namespace
-          - name: JAVA_APP_DIR
-            value: /deployments
-          - name: JAVA_OPTIONS
-            value: -Dvertx.cacheDirBase=/tmp
           image: crud-vertx:latest
           imagePullPolicy: IfNotPresent
           livenessProbe:
