@@ -2,18 +2,16 @@ package io.openshift.booster;
 
 import com.jayway.restassured.RestAssured;
 import com.jayway.restassured.response.Response;
-import io.openshift.booster.test.OpenShiftTestAssistant;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
-import org.junit.AfterClass;
+import org.arquillian.cube.openshift.impl.enricher.RouteURL;
+import org.jboss.arquillian.junit.Arquillian;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
-import java.io.File;
-import java.util.concurrent.TimeUnit;
+import java.net.URL;
 
-import static com.jayway.awaitility.Awaitility.await;
 import static com.jayway.restassured.RestAssured.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.entry;
@@ -22,46 +20,18 @@ import static org.hamcrest.core.Is.is;
 /**
  * Check the behavior of the application when running in OpenShift.
  */
+@RunWith(Arquillian.class)
 public class OpenShiftIT {
 
-  private static OpenShiftTestAssistant assistant = new OpenShiftTestAssistant();
+  private final String applicationName = "crud-vertx";
 
-  @BeforeClass
-  public static void prepare() throws Exception {
-    assistant.deployApplication();
-
-    // Deploy the database and wait until it's ready.
-    assistant.deploy("database", new File("src/test/resources/templates/database.yml"));
-    assistant.awaitPodReadinessOrFail(
-        pod -> "my-database".equals(pod.getMetadata().getLabels().get("app"))
-    );
-    System.out.println("Database ready");
-
-    assistant.deployApplication();
-
-    assistant.awaitApplicationReadinessOrFail();
-
-    await().atMost(5, TimeUnit.MINUTES).until(() -> {
-      try {
-        Response response = get();
-        return response.getStatusCode() < 500;
-      } catch (Exception e) {
-        return false;
-      }
-    });
-
-    RestAssured.baseURI = RestAssured.baseURI + "/api/fruits";
-
-  }
-
-  @AfterClass
-  public static void cleanup() {
-    assistant.cleanup();
-  }
-
+  @RouteURL(applicationName)
+  private URL route;
 
   @Before
-  public void removeAllData() {
+  public void setup() {
+    RestAssured.baseURI = route.toString() + "api/fruits";
+
     String s = get().asString();
     JsonArray array = new JsonArray(s);
     for (int i = 0; i < array.size(); i++) {
