@@ -23,9 +23,9 @@ import static org.hamcrest.core.Is.is;
 @RunWith(Arquillian.class)
 public class OpenShiftIT {
 
-  private final String applicationName = "crud-vertx";
+  private static final String APPLICATION_NAME = "crud-vertx";
 
-  @RouteURL(applicationName)
+  @RouteURL(APPLICATION_NAME)
   private URL route;
 
   @Before
