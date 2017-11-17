@@ -199,7 +199,7 @@
             <artifactId>maven-failsafe-plugin</artifactId>
             <configuration>
               <systemPropertyVariables>
-                <application.name>${project.artifactId}</application.name>
+                <app.name>${project.artifactId}</app.name>
               </systemPropertyVariables>
             </configuration>
             <executions>

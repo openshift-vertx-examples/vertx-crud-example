@@ -4,6 +4,7 @@ import com.jayway.restassured.RestAssured;
 import com.jayway.restassured.response.Response;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
+import org.arquillian.cube.openshift.impl.enricher.AwaitRoute;
 import org.arquillian.cube.openshift.impl.enricher.RouteURL;
 import org.jboss.arquillian.junit.Arquillian;
 import org.junit.Before;
@@ -23,7 +24,8 @@ import static org.hamcrest.core.Is.is;
 @RunWith(Arquillian.class)
 public class OpenShiftIT {
 
-  @RouteURL("${application.name}")
+  @AwaitRoute
+  @RouteURL("${app.name}")
   private URL route;
 
   @Before
