@@ -8,6 +8,7 @@ items:
     creationTimestamp: null
     labels:
       app: my-database
+      booster: crud-vertx
     name: my-database
   spec:
     lookupPolicy:
@@ -33,11 +34,13 @@ items:
     creationTimestamp: null
     labels:
       app: my-database
+      booster: crud-vertx
     name: my-database
   spec:
     replicas: 1
     selector:
       app: my-database
+      booster: crud-vertx
       deploymentconfig: my-database
     strategy:
       resources: {}
@@ -48,6 +51,7 @@ items:
         creationTimestamp: null
         labels:
           app: my-database
+          booster: crud-vertx
           deploymentconfig: my-database
       spec:
         containers:
@@ -96,6 +100,7 @@ items:
     creationTimestamp: null
     labels:
       app: my-database
+      booster: crud-vertx
     name: my-database
   spec:
     ports:
@@ -105,6 +110,7 @@ items:
       targetPort: 5432
     selector:
       app: my-database
+      booster: crud-vertx
       deploymentconfig: my-database
   status:
     loadBalancer: {}
