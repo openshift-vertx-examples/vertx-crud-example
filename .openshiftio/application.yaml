@@ -56,7 +56,7 @@ objects:
     output:
       to:
         kind: ImageStreamTag
-        name: crud-vertx:latest
+        name: crud-vertx:20
     postCommit: {}
     resources: {}
     source:
@@ -92,7 +92,7 @@ objects:
     labels:
       app: crud-vertx
       provider: fabric8
-      version: 20-SNAPSHOT
+      version: "20"
       group: io.openshift.booster
     name: my-database-secret
   stringData:
@@ -110,7 +110,7 @@ objects:
       expose: "true"
       app: crud-vertx
       provider: fabric8
-      version: 20-SNAPSHOT
+      version: "20"
       group: io.openshift.booster
     name: crud-vertx
   spec:
@@ -129,11 +129,11 @@ objects:
     annotations:
       fabric8.io/iconUrl: img/icons/vertx.svg
       fabric8.io/git-branch: master
-      fabric8.io/metrics-path: dashboard/file/kubernetes-pods.json/?var-project=crud-vertx&var-version=20-SNAPSHOT
+      fabric8.io/metrics-path: dashboard/file/kubernetes-pods.json/?var-project=crud-vertx&var-version=20
     labels:
       app: crud-vertx
       provider: fabric8
-      version: 20-SNAPSHOT
+      version: "20"
       group: io.openshift.booster
     name: crud-vertx
   spec:
@@ -152,11 +152,11 @@ objects:
         annotations:
           fabric8.io/iconUrl: img/icons/vertx.svg
           fabric8.io/git-branch: master
-          fabric8.io/metrics-path: dashboard/file/kubernetes-pods.json/?var-project=crud-vertx&var-version=20-SNAPSHOT
+          fabric8.io/metrics-path: dashboard/file/kubernetes-pods.json/?var-project=crud-vertx&var-version=20
         labels:
           app: crud-vertx
           provider: fabric8
-          version: 20-SNAPSHOT
+          version: "20"
           group: io.openshift.booster
       spec:
         containers:
@@ -175,7 +175,7 @@ objects:
             valueFrom:
               fieldRef:
                 fieldPath: metadata.namespace
-          image: crud-vertx:latest
+          image: crud-vertx:20
           imagePullPolicy: IfNotPresent
           livenessProbe:
             httpGet:
@@ -210,7 +210,7 @@ objects:
         - vertx
         from:
           kind: ImageStreamTag
-          name: crud-vertx:latest
+          name: crud-vertx:20
       type: ImageChange
 - apiVersion: v1
   kind: Route
@@ -218,7 +218,7 @@ objects:
     labels:
       app: crud-vertx
       provider: fabric8
-      version: 20-SNAPSHOT
+      version: "20"
       group: io.openshift.booster
     name: crud-vertx
   spec:
