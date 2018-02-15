@@ -1,7 +1,8 @@
 package io.openshift.booster;
 
-import com.jayway.restassured.RestAssured;
-import com.jayway.restassured.response.Response;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import org.arquillian.cube.openshift.impl.enricher.AwaitRoute;
@@ -13,7 +14,9 @@ import org.junit.runner.RunWith;
 
 import java.net.URL;
 
-import static com.jayway.restassured.RestAssured.*;
+import static io.restassured.RestAssured.given;
+import static io.restassured.RestAssured.delete;
+import static io.restassured.RestAssured.get;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.entry;
 import static org.hamcrest.core.Is.is;
