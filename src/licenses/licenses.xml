@@ -1606,8 +1606,8 @@
             <version>9.4.1212</version>
             <licenses>
                 <license>
-                    <name>BSD-2-Clause</name>
-                    <url>https://jdbc.postgresql.org/about/license.html</url>
+                    <name>BSD 2-clause "Simplified" License</name>
+                    <url>https://opensource.org/licenses/BSD-2-Clause/</url>
                 </license>
             </licenses>
         </dependency>
