@@ -37,17 +37,9 @@ public class JdbcProductStore implements Store {
 
   @Override
   public Single<JsonObject> create(JsonObject item) {
-    if (item == null) {
-      return Single.error(new IllegalArgumentException("The item must not be null"));
-    }
-    if (item.getString("name") == null || item.getString("name").isEmpty()) {
-      return Single.error(new IllegalArgumentException("The name must not be null or empty"));
-    }
-    if (item.getInteger("stock", 0) < 0) {
-      return Single.error(new IllegalArgumentException("The stock must greater or equal to 0"));
-    }
-    if (item.containsKey("id")) {
-      return Single.error(new IllegalArgumentException("The created item already contains an 'id'"));
+    Exception error = validateRequestBody(item);
+    if (error != null) {
+      return Single.error(error);
     }
 
     return db.rxGetConnection()
@@ -59,6 +51,43 @@ public class JdbcProductStore implements Store {
           .map(ur -> item.put("id", ur.getKeys().getLong(0)))
           .doAfterTerminate(conn::close);
       });
+  }
+
+  @Override
+  public Completable update(long id, JsonObject item) {
+    Exception error = validateRequestBody(item);
+    if (error != null) {
+      return Completable.error(error);
+    }
+
+    return db.rxGetConnection()
+      .flatMapCompletable(conn -> {
+        JsonArray params = new JsonArray().add(item.getValue("name")).add(item.getValue("stock", 0)).add(id);
+        return conn.rxUpdateWithParams(UPDATE, params)
+          .flatMapCompletable(up -> {
+            if (up.getUpdated() == 0) {
+              return Completable.error(new NoSuchElementException("Unknown item '" + id + "'"));
+            }
+            return Completable.complete();
+          })
+          .doAfterTerminate(conn::close);
+      });
+  }
+
+  private Exception validateRequestBody(JsonObject item) {
+    if (item == null) {
+      return new IllegalArgumentException("The item must not be null");
+    }
+    if ( !(item.getValue("name") instanceof String) || item.getString("name") == null || item.getString("name").isEmpty()) {
+      return new IllegalArgumentException("The name is required!");
+    }
+    if (!(item.getValue("stock") instanceof Integer) || item.getInteger("stock") < 0) {
+      return new IllegalArgumentException("The stock must be greater or equal to 0!");
+    }
+    if (item.containsKey("id")) {
+      return new IllegalArgumentException("Id was invalidly set on request.");
+    }
+    return null;
   }
 
   @Override
@@ -91,35 +120,6 @@ public class JdbcProductStore implements Store {
             } else {
               return Single.just(list.get(0));
             }
-          })
-          .doAfterTerminate(conn::close);
-      });
-  }
-
-  @Override
-  public Completable update(long id, JsonObject item) {
-    if (item == null) {
-      return Completable.error(new IllegalArgumentException("The item must not be null"));
-    }
-    if (item.getString("name") == null || item.getString("name").isEmpty()) {
-      return Completable.error(new IllegalArgumentException("The name must not be null or empty"));
-    }
-    if (item.getInteger("stock", 0) < 0) {
-      return Completable.error(new IllegalArgumentException("The stock must greater or equal to 0"));
-    }
-    if (item.containsKey("id") && id != item.getInteger("id")) {
-      return Completable.error(new IllegalArgumentException("The 'id' cannot be changed"));
-    }
-
-    return db.rxGetConnection()
-      .flatMapCompletable(conn -> {
-        JsonArray params = new JsonArray().add(item.getValue("name")).add(item.getValue("stock", 0)).add(id);
-        return conn.rxUpdateWithParams(UPDATE, params)
-          .flatMapCompletable(up -> {
-            if (up.getUpdated() == 0) {
-              return Completable.error(new NoSuchElementException("Unknown item '" + id + "'"));
-            }
-            return Completable.complete();
           })
           .doAfterTerminate(conn::close);
       });
