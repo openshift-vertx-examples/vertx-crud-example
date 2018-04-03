@@ -300,7 +300,7 @@ public class OpenShiftIT {
 
     result = new JsonObject(response.asString());
     assertThat(result.getString("error")).isNotBlank();
-    assertThat(result.getString("path")).isEqualTo("/api/fruits");
+    assertThat(result.getString("path")).isEqualTo("/api/fruits/" + id);
   }
 
   @Test
@@ -310,7 +310,7 @@ public class OpenShiftIT {
       .post()
       .then().assertThat().statusCode(201).extract().response();
 
-    JsonObject result = new JsonObject(response.asString());
+   JsonObject result = new JsonObject(response.asString());
     long id = result.getLong("id");
     response = given()
       .body(new JsonObject().put("name", "Banana").put("stock",-1).encode())
@@ -319,7 +319,7 @@ public class OpenShiftIT {
 
     result = new JsonObject(response.asString());
     assertThat(result.getString("error")).isNotBlank();
-    assertThat(result.getString("path")).isEqualTo("/api/fruits");
+    assertThat(result.getString("path")).isEqualTo("/api/fruits/" + id);
   }
 
   @Test

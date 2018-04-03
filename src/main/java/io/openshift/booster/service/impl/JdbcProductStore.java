@@ -12,6 +12,7 @@ import rx.Observable;
 import rx.Single;
 
 import java.util.NoSuchElementException;
+import java.util.Optional;
 
 /**
  * The implementation of the store.
@@ -37,9 +38,9 @@ public class JdbcProductStore implements Store {
 
   @Override
   public Single<JsonObject> create(JsonObject item) {
-    Exception error = validateRequestBody(item);
-    if (error != null) {
-      return Single.error(error);
+    Optional<Exception> error = validateRequestBody(item);
+    if (validateRequestBody(item).isPresent()){
+      return Single.error(error.get());
     }
 
     return db.rxGetConnection()
@@ -55,9 +56,9 @@ public class JdbcProductStore implements Store {
 
   @Override
   public Completable update(long id, JsonObject item) {
-    Exception error = validateRequestBody(item);
-    if (error != null) {
-      return Completable.error(error);
+    Optional<Exception> error = validateRequestBody(item);
+    if (validateRequestBody(item).isPresent()){
+      return Completable.error(error.get());
     }
 
     return db.rxGetConnection()
@@ -74,20 +75,21 @@ public class JdbcProductStore implements Store {
       });
   }
 
-  private Exception validateRequestBody(JsonObject item) {
+  private Optional<Exception> validateRequestBody(JsonObject item) {
     if (item == null) {
-      return new IllegalArgumentException("The item must not be null");
+      return Optional.of(new IllegalArgumentException("The item must not be null"));
     }
-    if ( !(item.getValue("name") instanceof String) || item.getString("name") == null || item.getString("name").isEmpty()) {
-      return new IllegalArgumentException("The name is required!");
+    if (!(item.getValue("name") instanceof String) || item.getString("name") == null
+        || item.getString("name").isEmpty()) {
+      return Optional.of(new IllegalArgumentException("The name is required!"));
     }
     if (!(item.getValue("stock") instanceof Integer) || item.getInteger("stock") < 0) {
-      return new IllegalArgumentException("The stock must be greater or equal to 0!");
+      return Optional.of(new IllegalArgumentException("The stock must be greater or equal to 0!"));
     }
     if (item.containsKey("id")) {
-      return new IllegalArgumentException("Id was invalidly set on request.");
+      return Optional.of(new IllegalArgumentException("Id was invalidly set on request."));
     }
-    return null;
+    return Optional.empty();
   }
 
   @Override
