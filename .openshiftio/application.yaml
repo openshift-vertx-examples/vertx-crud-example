@@ -56,7 +56,7 @@ objects:
     output:
       to:
         kind: ImageStreamTag
-        name: booster/crud-vertx:27
+        name: booster/crud-vertx:snapshot-180813-113924-0164
     postCommit: {}
     resources: {}
     source:
@@ -92,7 +92,7 @@ objects:
     labels:
       app: crud-vertx
       provider: fabric8
-      version: "27"
+      version: 28-SNAPSHOT
       group: io.openshift.booster
     name: my-database-secret
   stringData:
@@ -110,7 +110,7 @@ objects:
       expose: "true"
       app: crud-vertx
       provider: fabric8
-      version: "27"
+      version: 28-SNAPSHOT
       group: io.openshift.booster
     name: crud-vertx
   spec:
@@ -129,11 +129,11 @@ objects:
     annotations:
       fabric8.io/iconUrl: img/icons/vertx.svg
       fabric8.io/git-branch: master
-      fabric8.io/metrics-path: dashboard/file/kubernetes-pods.json/?var-project=crud-vertx&var-version=27
+      fabric8.io/metrics-path: dashboard/file/kubernetes-pods.json/?var-project=crud-vertx&var-version=28-SNAPSHOT
     labels:
       app: crud-vertx
       provider: fabric8
-      version: "27"
+      version: 28-SNAPSHOT
       group: io.openshift.booster
     name: crud-vertx
   spec:
@@ -152,11 +152,11 @@ objects:
         annotations:
           fabric8.io/iconUrl: img/icons/vertx.svg
           fabric8.io/git-branch: master
-          fabric8.io/metrics-path: dashboard/file/kubernetes-pods.json/?var-project=crud-vertx&var-version=27
+          fabric8.io/metrics-path: dashboard/file/kubernetes-pods.json/?var-project=crud-vertx&var-version=28-SNAPSHOT
         labels:
           app: crud-vertx
           provider: fabric8
-          version: "27"
+          version: 28-SNAPSHOT
           group: io.openshift.booster
       spec:
         containers:
@@ -175,7 +175,7 @@ objects:
             valueFrom:
               fieldRef:
                 fieldPath: metadata.namespace
-          image: booster/crud-vertx:27
+          image: booster/crud-vertx:snapshot-180813-113924-0164
           imagePullPolicy: IfNotPresent
           livenessProbe:
             httpGet:
@@ -211,7 +211,7 @@ objects:
       expose: "true"
       app: crud-vertx
       provider: fabric8
-      version: "27"
+      version: 28-SNAPSHOT
       group: io.openshift.booster
     name: crud-vertx
   spec:
