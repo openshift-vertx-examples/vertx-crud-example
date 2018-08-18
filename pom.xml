@@ -35,7 +35,7 @@
   <properties>
     <vertx.version>3.5.3</vertx.version>
     <slf4j.version>1.7.25</slf4j.version>
-    <vertx-maven-plugin.version>1.0.13</vertx-maven-plugin.version>
+    <vertx-maven-plugin.version>1.0.17</vertx-maven-plugin.version>
     <vertx.verticle>io.openshift.booster.CrudApplication</vertx.verticle>
   </properties>
 
@@ -119,7 +119,7 @@
   <build>
     <plugins>
       <plugin>
-        <groupId>io.fabric8</groupId>
+        <groupId>io.reactiverse</groupId>
         <artifactId>vertx-maven-plugin</artifactId>
         <version>${vertx-maven-plugin.version}</version>
         <executions>
