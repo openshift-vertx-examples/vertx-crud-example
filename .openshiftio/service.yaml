@@ -3,9 +3,6 @@ items:
 - apiVersion: v1
   kind: ImageStream
   metadata:
-    annotations:
-      openshift.io/generated-by: OpenShiftNewApp
-    creationTimestamp: null
     labels:
       app: my-database
       booster: crud-vertx
@@ -19,19 +16,11 @@ items:
       from:
         kind: DockerImage
         name: openshift/postgresql-92-centos7
-      generation: null
-      importPolicy: {}
       name: latest
-      referencePolicy:
-        type: ""
-  status:
-    dockerImageRepository: ""
+
 - apiVersion: v1
   kind: DeploymentConfig
   metadata:
-    annotations:
-      openshift.io/generated-by: OpenShiftNewApp
-    creationTimestamp: null
     labels:
       app: my-database
       booster: crud-vertx
@@ -42,13 +31,8 @@ items:
       app: my-database
       booster: crud-vertx
       deploymentconfig: my-database
-    strategy:
-      resources: {}
     template:
       metadata:
-        annotations:
-          openshift.io/generated-by: OpenShiftNewApp
-        creationTimestamp: null
         labels:
           app: my-database
           booster: crud-vertx
@@ -74,7 +58,6 @@ items:
         volumes:
         - emptyDir: {}
           name: my-database-volume-1
-    test: false
     triggers:
     - type: ConfigChange
     - imageChangeParams:
@@ -85,19 +68,10 @@ items:
           kind: ImageStreamTag
           name: my-database:latest
       type: ImageChange
-  status:
-    availableReplicas: 0
-    latestVersion: 0
-    observedGeneration: 0
-    replicas: 0
-    unavailableReplicas: 0
-    updatedReplicas: 0
+
 - apiVersion: v1
   kind: Service
   metadata:
-    annotations:
-      openshift.io/generated-by: OpenShiftNewApp
-    creationTimestamp: null
     labels:
       app: my-database
       booster: crud-vertx
@@ -112,7 +86,5 @@ items:
       app: my-database
       booster: crud-vertx
       deploymentconfig: my-database
-  status:
-    loadBalancer: {}
 kind: List
 metadata: {}
