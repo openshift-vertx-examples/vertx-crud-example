@@ -21,7 +21,7 @@
 
   <groupId>io.openshift.booster</groupId>
   <artifactId>crud-vertx</artifactId>
-  <version>30</version>
+  <version>31-SNAPSHOT</version>
   <packaging>jar</packaging>
 
   <name>crud</name>
