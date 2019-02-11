@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -e
 
-sif [ ! -d ".openshiftio" ]; then
+if [ ! -d ".openshiftio" ]; then
   warning "The script expects the .openshiftio directory to exist"
   exit 1
 fi
