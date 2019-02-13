@@ -64,7 +64,7 @@ public class CrudApplication extends AbstractVerticle {
     // Create the HTTP server and pass the "accept" method to the request handler.
     return vertx
       .createHttpServer()
-      .requestHandler(router::accept)
+      .requestHandler(router)
       .rxListen(8080);
   }
 
