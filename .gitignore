@@ -130,3 +130,6 @@ dist/
 nbdist/
 nbactions.xml
 .nb-gradle/
+
+# VS Code
+settings.json
