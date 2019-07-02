@@ -1,7 +1,7 @@
-package io.openshift.booster;
+package io.openshift.example;
 
-import io.openshift.booster.service.Store;
-import io.openshift.booster.service.impl.JdbcProductStore;
+import io.openshift.example.service.Store;
+import io.openshift.example.service.impl.JdbcProductStore;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.rxjava.core.AbstractVerticle;
@@ -16,7 +16,7 @@ import rx.Single;
 
 import java.util.NoSuchElementException;
 
-import static io.openshift.booster.Errors.error;
+import static io.openshift.example.Errors.error;
 
 public class CrudApplication extends AbstractVerticle {
 

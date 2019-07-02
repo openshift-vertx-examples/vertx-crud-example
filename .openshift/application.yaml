@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: Template
 metadata:
-  name: vertx-crud-booster
+  name: vertx-crud-example
   annotations:
     description: This template creates a Vert.x application intereacting with a database.
     tags: instant-app
@@ -33,7 +33,7 @@ objects:
   metadata:
     name: crud-vertx
     labels:
-      booster: crud-vertx
+      example: crud-vertx
   spec: {}
 
 - apiVersion: v1
@@ -41,7 +41,7 @@ objects:
   metadata:
     name: runtime-crud-vertx
     labels:
-      booster: crud-vertx
+      example: crud-vertx
   spec:
     tags:
     - name: latest
@@ -54,7 +54,7 @@ objects:
   metadata:
     name: crud-vertx
     labels:
-      booster: crud-vertx
+      example: crud-vertx
   spec:
     output:
       to:
@@ -93,7 +93,7 @@ objects:
   metadata:
     labels:
       app: crud-vertx
-      group: io.openshift.booster
+      group: io.openshift.example
     name: my-database-secret
   stringData:
     user: luke
@@ -107,7 +107,7 @@ objects:
       prometheus.io/port: "9779"
     labels:
       app: crud-vertx
-      group: io.openshift.booster
+      group: io.openshift.example
     name: crud-vertx
   spec:
     ports:
@@ -117,25 +117,25 @@ objects:
       targetPort: 8080
     selector:
       app: crud-vertx
-      group: io.openshift.booster
+      group: io.openshift.example
 
 - apiVersion: apps.openshift.io/v1
   kind: DeploymentConfig
   metadata:
     labels:
       app: crud-vertx
-      group: io.openshift.booster
+      group: io.openshift.example
     name: crud-vertx
   spec:
     replicas: 1
     selector:
       app: crud-vertx
-      group: io.openshift.booster
+      group: io.openshift.example
     template:
       metadata:
         labels:
           app: crud-vertx
-          group: io.openshift.booster
+          group: io.openshift.example
       spec:
         containers:
         - env:
@@ -196,7 +196,7 @@ objects:
   metadata:
     labels:
       app: crud-vertx
-      group: io.openshift.booster
+      group: io.openshift.example
     name: crud-vertx
   spec:
     port:
