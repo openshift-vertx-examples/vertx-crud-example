@@ -1,20 +1,20 @@
 #!/usr/bin/env bash
 set -e
 
-if [ ! -d ".openshiftio" ]; then
-  warning "The script expects the .openshiftio directory to exist"
+if [ ! -d ".openshift" ]; then
+  warning "The script expects the .openshift directory to exist"
   exit 1
 fi
 
-source .openshiftio/openshift.sh
+source .openshift/openshift.sh
 
 if [ -z "$1" ]; then
-  ORG="openshiftio-vertx-boosters"
+  ORG="openshift-vertx-examples"
 else
   ORG=$1
 fi
 
-REPO="https://github.com/$ORG/vertx-crud-booster"
+REPO="https://github.com/$ORG/vertx-crud-example"
 echo -e "\n${YELLOW}Using source repository: $REPO ...\n${NC}"
 
 # cleanup
@@ -37,11 +37,11 @@ oc delete routes --all
 oc delete template --all
 
 # Deploy the templates and required resources
-oc apply -f .openshiftio/service.yaml
-oc apply -f .openshiftio/application.yaml
+oc apply -f .openshift/service.yaml
+oc apply -f .openshift/application.yaml
 
 # Create the application
-oc new-app --template=vertx-crud-booster -p SOURCE_REPOSITORY_URL="$REPO"
+oc new-app --template=vertx-crud-example -p SOURCE_REPOSITORY_URL="$REPO"
 
 # wait for pod to be ready
 waitForPodState "my-database" "Running"

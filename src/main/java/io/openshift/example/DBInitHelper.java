@@ -1,4 +1,4 @@
-package io.openshift.booster;
+package io.openshift.example;
 
 import io.vertx.ext.sql.SQLOptions;
 import io.vertx.rxjava.core.Vertx;
