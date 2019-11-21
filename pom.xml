@@ -28,7 +28,7 @@
   <description>Vertx - CRUD</description>
 
   <properties>
-    <vertx.version>3.8.0</vertx.version>
+    <vertx.version>3.8.4</vertx.version>
     <slf4j.version>1.7.28</slf4j.version>
     <vertx-maven-plugin.version>1.0.20</vertx-maven-plugin.version>
     <vertx.verticle>io.openshift.example.CrudApplication</vertx.verticle>
