@@ -21,7 +21,7 @@
 
   <groupId>io.openshift.example</groupId>
   <artifactId>crud-vertx</artifactId>
-  <version>36-SNAPSHOT</version>
+  <version>36</version>
   <packaging>jar</packaging>
 
   <name>crud</name>
