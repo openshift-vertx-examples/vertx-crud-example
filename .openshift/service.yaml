@@ -6,6 +6,11 @@ items:
     labels:
       app: my-database
       example: crud-vertx
+      app.kubernetes.io/part-of: crud-example
+      app.kubernetes.io/name: crud-db
+      app.kubernetes.io/component: database
+      app.kubernetes.io/runtime: postgresql
+      app.kubernetes.io/runtime-version: "10"
     name: my-database
   spec:
     lookupPolicy:
@@ -24,6 +29,11 @@ items:
     labels:
       app: my-database
       example: crud-vertx
+      app.kubernetes.io/part-of: crud-example
+      app.kubernetes.io/name: crud-db
+      app.kubernetes.io/component: database
+      app.kubernetes.io/runtime: postgresql
+      app.kubernetes.io/runtime-version: "10"
     name: my-database
   spec:
     replicas: 1
@@ -75,6 +85,11 @@ items:
     labels:
       app: my-database
       example: crud-vertx
+      app.kubernetes.io/part-of: crud-example
+      app.kubernetes.io/name: crud-db
+      app.kubernetes.io/component: database
+      app.kubernetes.io/runtime: postgresql
+      app.kubernetes.io/runtime-version: "10"
     name: my-database
   spec:
     ports:
