@@ -40,7 +40,7 @@
     <maven.compiler.target>1.8</maven.compiler.target>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
-    <fabric8.generator.from>registry.access.redhat.com/redhat-openjdk-18/openjdk18-openshift</fabric8.generator.from>
+    <fabric8.generator.from>registry.access.redhat.com/ubi8/openjdk-11</fabric8.generator.from>
   </properties>
 
   <dependencyManagement>
@@ -164,6 +164,7 @@
           <includeOnlyProperties>
             <includeOnlyProperty>^git.remote.origin.url$</includeOnlyProperty>
           </includeOnlyProperties>
+          <failOnNoGitDirectory>false</failOnNoGitDirectory>
         </configuration>
       </plugin>
     </plugins>
